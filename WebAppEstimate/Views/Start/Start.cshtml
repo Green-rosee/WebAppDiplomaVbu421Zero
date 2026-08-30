@@ -1,0 +1,154 @@
+<!-- [[
+
+&copy; 2026 - WebAppEstimate - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+	</div>
+</footer>
+
+@section Scripts {
+	
+	
+
+	@* Если для страницы Start.cshtml нужны уникальные скрипты, пишите их здесь *@
+}
+
+</body>				
+</html>
+
+
+
+-->
+
+
+@{
+	Layout = "_Layout";
+	ViewData["Title"] = "Судоремонтные услуги";
+}
+
+<!-- Блок входа авторизации
+<a class="shipyard-card auth-card-logout">
+	<div class="auth-top-bar text-right" style="padding: 10px; margin-bottom: 20px; ">
+		<h3>Времено блок не работает</h3>
+		@if (User.Identity != null && User.Identity.IsAuthenticated)
+		{
+			<span>Привет, <strong>@User.Identity.Name</strong>!</span>
+			<a asp-area="" asp-controller="" asp-action="" class="btn btn-sm btn-outline-danger"
+			   style="margin-left: 15px;">Выйти</a>
+		}
+		else
+		{
+			<a asp-area="" asp-controller="" asp-action="" class="btn btn-sm btn-primary">Войти в систему</a>
+		}
+	</div>
+</a>
+-->
+
+<!-- БЛОК АВТОРИЗАЦИИ: Вход / Выход -->
+@if (User.Identity != null && User.Identity.IsAuthenticated)
+{
+	<!-- Этот блок виден ТОЛЬКО авторизованным пользователям -->
+	<a asp-area="" asp-controller="Account" asp-action="AccountLoginOut" class="shipyard-card auth-card-logout">
+		<div class="card-border-effect"></div>
+		<div class="card-content">
+			<div class="card-icon">🚪</div>
+			<h3>Личный кабинет</h3>
+			<p>Вы вошли как: <strong>@User.Identity.Name</strong></p>
+			<span class="card-link-text" style="color: #ff4d4d;">Выйти из системы &rarr;</span>
+		</div>
+	</a>
+}
+else
+{
+	<!-- Этот блок виден ТОЛЬКО гостям -->
+	<a asp-area="" asp-controller="Account" asp-action="Account" class="shipyard-card auth-card-login">
+		<div class="card-border-effect"></div>
+		<div class="card-content">
+			<div class="card-icon">🔑</div>
+			<h3>Авторизация</h3>
+			<p>Войдите в систему для получения полного доступа к сметным расчетам.</p>
+			<span class="card-link-text">Войти в профиль &rarr;</span>
+		</div>
+	</a>
+}
+
+
+
+<!-- Начало выбора разделов для расчета смет -->
+<div class="shipyard-container">
+	<div class="shipyard-welcome text-center">
+		<h1 class="display-4 text-uppercase font-weight-bold">Судоверфь & Ремонт</h1>
+		<p class="lead text-muted">Комплексное техническое обслуживание, модернизация и докование судов</p>
+	</div>
+
+	<div class="shipyard-grid">
+		<!-- Блок 1: Расчет стоимости насосы-->
+
+		<a asp-area="SiteAdam" asp-controller="Home" asp-action="Index" class="shipyard-card">
+			<div class="card-border-effect"></div>
+			<div class="card-content">
+				<div class="card-icon">⚓</div>
+				<h3>Расчет сметы</h3>
+				<p>Онлайн-калькулятор стоимости ремонта, судового оборудования.</p>
+				<span class="card-link-text">Перейти к расчету Насосов &rarr;</span>
+			</div>
+		</a>
+
+		<!-- Блок 2: Расчет стоимости палубных механизмов -->
+
+		<a asp-area="SiteBram" asp-controller="Home" asp-action="Index" class="shipyard-card">
+			<div class="card-border-effect"></div>
+			<div class="card-content">
+				<div class="card-icon">🛠️</div>
+				<h3>Расчет сметы</h3>
+				<p>Онлайн-калькулятор стоимости ремонта, судового оборудования.</p>
+				<span class="card-link-text">Перейти к расчету Палубных механизмов &rarr;</span>
+			</div>
+		</a>
+
+		<!-- Блок 3: Контакты и Заявки -->
+		<a asp-controller="" asp-action="" class="shipyard-card">
+			<div class="card-border-effect"></div>
+			<div class="card-content">
+				<div class="card-icon">📋</div>
+				<h3>Оставить заявку</h3>
+				<p>Связь со сметным отделом, отправка чертежей и вызов дефектовщика на объект.</p>
+				<p>Раздел в разработке ...............</p>
+				<span class="card-link-text">Связаться с нами &rarr;</span>
+			</div>
+		</a>
+	</div>
+	
+	
+	<!-- БЛОК АВТОРИЗАЦИИ: Вход / Выход -->
+	@if (User.Identity != null && User.Identity.IsAuthenticated)
+	{
+		<!-- Этот блок виден ТОЛЬКО авторизованным пользователям -->
+		<a asp-area="" asp-controller="Account" asp-action="AccountLoginOut" class="shipyard-card auth-card-logout">
+			<div class="card-border-effect"></div>
+			<div class="card-content">
+				<div class="card-icon">🚪</div>
+				<h3>Личный кабинет</h3>
+				<p>Вы вошли как: <strong>@User.Identity.Name</strong></p>
+				<span class="card-link-text" style="color: #ff4d4d;">Выйти из системы &rarr;</span>
+			</div>
+		</a>
+	}
+	else
+	{
+		<!-- Этот блок виден ТОЛЬКО гостям -->
+		<a asp-area="" asp-controller="Account" asp-action="Account" class="shipyard-card auth-card-login">
+			<div class="card-border-effect"></div>
+			<div class="card-content">
+				<div class="card-icon">🔑</div>
+				<h3>Авторизация</h3>
+				<p>Войдите в систему для получения полного доступа к сметным расчетам.</p>
+				<span class="card-link-text">Войти в профиль &rarr;</span>
+			</div>
+		</a>
+	}
+</div>
+
+
+
+
+
+

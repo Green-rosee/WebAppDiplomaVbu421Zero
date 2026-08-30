@@ -1,0 +1,87 @@
+/* Контейнер по центру экрана */
+.shipyard-container {
+    max-width: 1200px;
+    margin: 60px auto;
+    padding: 0 20px;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.shipyard-welcome {
+    margin-bottom: 50px;
+}
+
+.shipyard-welcome h1 {
+    color: #1a365d; /* Темно-синий морской оттенок */
+    letter-spacing: 1px;
+}
+
+/* Сетка для трех карточек-рамок */
+.shipyard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    justify-content: center;
+}
+
+/* Стилизация рамки-ссылки */
+.shipyard-card {
+    position: relative;
+    background: #ffffff;
+    text-decoration: none !important;
+    color: #333333;
+    border: 2px solid #cbd5e1; /* Четкая рамка */
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.3s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+/* Эффект изменения рамки при наведении */
+.shipyard-card:hover {
+    transform: translateY(-5px);
+    border-color: #1a365d; /* Смена цвета рамки на морской синий */
+    box-shadow: 0 10px 15px -3px rgba(26, 54, 93, 0.2);
+}
+
+/* Внутренний отступ контента */
+.card-content {
+    padding: 35px 25px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.card-icon {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+    color: #2b6cb0;
+}
+
+.shipyard-card h3 {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #1a365d;
+    margin-bottom: 15px;
+}
+
+.shipyard-card p {
+    font-size: 0.95rem;
+    color: #4a5568;
+    line-height: 1.6;
+    margin-bottom: 25px;
+    flex-grow: 1;
+}
+
+/* Текст стрелки */
+.card-link-text {
+    font-weight: 600;
+    color: #2b6cb0;
+    transition: color 0.2s ease;
+    margin-top: auto;
+}
+
+.shipyard-card:hover .card-link-text {
+    color: #1a365d;
+}

@@ -1,0 +1,44 @@
+﻿<!-- 
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+    <h5>Это начальная страница для входа в разделы сайта по Судоремонту</h5>
+    <ul class="navbar-nav flex-grow-1">
+        
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-area="" asp-controller="Start" asp-action="Start">Start</a>
+        </li>
+
+    </ul>
+</div>
+-->
+
+@{
+    ViewData["Title"] = "Главная";
+}
+
+<div class="welcome-shipyard-container">
+    <div class="welcome-box text-center">
+        <!-- Декоративный элемент: силуэт якоря или штурвала -->
+        <div class="nautical-badge">⚓</div>
+        
+        <h1 class="display-4 welcome-title">Diploma Project on Estimate</h1>
+        <p class="welcome-subtitle">Система расчета и управления судоремонтными проектами</p>
+        
+        <hr class="welcome-divider" />
+        
+        <h5 class="welcome-info-text">Добро пожаловать. Используйте кнопку ниже для перехода в рабочие разделы системы.</h5>
+        
+        <!-- Главная стилизованная кнопка-рамка -->
+        <div class="action-wrapper">
+            <a class="enter-shipyard-btn" asp-area="" asp-controller="Start" asp-action="Start">
+                <span class="btn-icon">🚢</span>
+                <span class="btn-text">Войти в систему</span>
+                <span class="btn-arrow">&rarr;</span>
+            </a>
+        </div>
+    </div>
+</div>

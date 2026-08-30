@@ -1,0 +1,59 @@
+@startuml
+' Настройка внешнего вида
+left to right direction
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+
+' 1. Объявление ролей пользователей
+actor "Пользователь А" as UserA
+actor "Пользователь Б" as UserB
+actor "Администратор" as Admin
+
+' 2. Границы вашей системы
+rectangle "Система расчета стоимости продуктов" {
+    
+    ' Блок авторизации
+    usecase "Вход на сайт / Авторизация" as Login
+    
+    ' Блок Области А
+    package "Область А" {
+        usecase "Доступ к Области А" as ZoneA
+        usecase "Выбор продуктов А" as SelectProdA
+    }
+    
+    ' Блок Области Б
+    package "Область Б" {
+        usecase "Доступ к Области Б" as ZoneB
+        usecase "Выбор продуктов Б" as SelectProdB
+    }
+    
+    ' Общая бизнес-логика для продуктов
+    usecase "Заполнение формы расчета стоимости" as Calculate
+    usecase "Вывод данных в Excel файл" as ExportExcel
+    
+    ' Функции Администратора
+    usecase "Управление пользователями и правами" as ManageUsers
+    
+    ' Внутренние связи системы
+    Calculate .> ExportExcel : <<include>>
+    SelectProdA .> Calculate : <<use>>
+    SelectProdB .> Calculate : <<use>>
+}
+
+' 3. Распределение прав доступа (Стрелочки)
+
+' Доступ для Пользователя А (только Область А)
+UserA --> Login
+UserA --> ZoneA
+
+' Доступ для Пользователя Б (только Область Б)
+UserB --> Login
+UserB --> ZoneB
+
+' Полный доступ для Администратора (ко всему)
+Admin --> Login
+Admin --> ZoneA
+Admin --> ZoneB
+Admin --> ManageUsers
+
+@enduml

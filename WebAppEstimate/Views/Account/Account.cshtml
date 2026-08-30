@@ -1,0 +1,77 @@
+
+@model WebAppEstimate.Models.User.UserLogin;
+@{
+    ViewData["Title"] = "Вход в систему";
+}
+
+<h1>Views Account Page LoginForm</h1>
+
+<div class="text-center">
+    <h1 class="display-4">Login Page</h1>
+    <h5>Base Login Page View Login</h5>
+
+    <div class="row justify-content-center align-items-center min-vh-75">
+        <div class="col-md-5">
+            <div class="card shadow-sm border-0 mt-5">
+                <div class="card-body p-4">
+                    <h2 class="text-center mb-4 text-secondary">Авторизация</h2>
+
+                    <form method="post" asp-controller="Account" asp-action="Account">
+                        <!-- Вывод общих ошибок валидации (например, неверный пароль) -->
+                        <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="Login" type="text" class="form-control" id="loginId" required
+                                   placeholder="login"/>
+                            <label for="loginId">Login</label>
+                            <span class="text-danger small" asp-validation-for="Login"></span>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="Password" type="password" class="form-control" id="passwordId"
+                                   placeholder="password" required/>
+                            <label for="passwordId">Password</label>
+                            <!-- Кнопка переключения видимости пароля -->
+                            <button type="button" id="togglePassword"
+                                    class="btn position-absolute end-0 top-50 translate-middle-y me-2 border-0 bg-transparent"
+                                    style="z-index: 10;">
+                                👁️
+                            </button>
+
+                            <span class="text-danger small" asp-validation-for="Password"></span>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="rememberMe">
+                            <label class="form-check-label" for="rememberMe">
+                                Запомнить меня
+                            </label>
+                        </div>
+
+                        <button class="w-100 btn btn-lg btn-primary" type="submit">Войти</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('togglePassword').addEventListener('click', function () {
+            const passwordInput = document.getElementById('passwordId');
+
+            // Проверяем текущий тип поля
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text'; // Показываем пароль
+                this.textContent = '🙈';     // Меняем иконку (закрытый глаз)
+            } else {
+                passwordInput.type = 'password'; // Скрываем пароль
+                this.textContent = '👁️';         // Возвращаем иконку (открытый глаз)
+            }
+        });
+    </script>
+
+    <!-- Подключение скриптов клиентской валидации -->
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

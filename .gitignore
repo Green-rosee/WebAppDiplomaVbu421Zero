@@ -1,0 +1,25 @@
+bin/
+obj/
+/packages/
+riderModule.iml
+/_ReSharper.Caches/
+
+# Rider / JetBrains
+.idea/
+*.sln.DotSettings.user
+
+# SQLite Database files (тестовая база разработки)
+*.sqlite
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+desktop.ini
+*.db
+
+# Temporary publish
+publish-test/
+**/publish-test/
+
+# Windows
+desktop.ini
+Thumbs.db
