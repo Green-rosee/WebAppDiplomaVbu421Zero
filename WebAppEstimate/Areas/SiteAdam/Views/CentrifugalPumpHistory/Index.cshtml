@@ -22,12 +22,12 @@
     <table class="table table-striped table-bordered">
         <thead>
         <tr>
-            <th>Название</th>
-            <th>Количество</th>
-            <th>Стоимость часа</th>
-            <th>Сумма часов</th>
-            <th>Общая стоимость</th>
-            <th>Дата</th>
+            <th>Наименование ремонтируемого насосного агрегата.</th>
+            <th>Количество.</th>
+            <th>Стоимость часа,уе.</th>
+            <th>Сумма часов,трудоемкость.</th>
+            <th>Общая стоимость,уе.</th>
+            <th>Дата.</th>
         </tr>
         </thead>
 
@@ -36,7 +36,7 @@
         @foreach (var item in Model)
         {
             <tr>
-                <td>@item.Name</td>
+                <td>@item.Name (учтено Крылатка @item.Impeller мм, Производительность @item.Volume м3/ч,Масса @item.Weight кг)</td>
 
                 <td>@item.Number</td>
 
