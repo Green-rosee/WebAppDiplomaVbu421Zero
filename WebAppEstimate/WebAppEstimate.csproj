@@ -26,6 +26,7 @@
         <Folder Include="Areas\SiteBram\Data\"/>
         <Folder Include="Areas\SiteBram\Models\"/>
         <Folder Include="Views\Account\"/>
+        <Folder Include="Views\Error\"/>
         <Folder Include="Views\Login\"/>
     </ItemGroup>
 

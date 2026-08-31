@@ -10,4 +10,8 @@ public interface ICentrifugalPumpHistoryService
 
 
     Task<List<PumpCentrifugalHistory>> GetAllAsync();
+
+    //------------------------------
+    Task DeleteAsync(int id);
+    Task DeleteAllAsync();
 }

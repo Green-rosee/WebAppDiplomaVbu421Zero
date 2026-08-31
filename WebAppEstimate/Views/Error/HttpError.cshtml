@@ -1,0 +1,30 @@
+
+@{
+    ViewData["Title"] = "HttpError-Ошибка";
+}
+
+<h3 class="text-bg-info text-bg-danger">HttpError</h3>
+<br/>
+
+<div class="container text-center mt-5">
+
+    <h1 class="display-1">
+        @ViewBag.StatusCode
+    </h1>
+
+    <h2>
+        @ViewBag.ErrorMessage
+    </h2>
+
+    <p class="mt-3 text-muted">
+        Возможно, адрес страницы был введён неправильно
+        или страница больше не существует.
+    </p>
+
+    <a asp-controller="Start"
+       asp-action="Start"
+       class="btn btn-primary mt-3">
+        Вернуться на главную
+    </a>
+
+</div>

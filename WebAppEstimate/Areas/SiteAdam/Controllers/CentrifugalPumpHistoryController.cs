@@ -35,13 +35,9 @@ public class CentrifugalPumpHistoryController : Controller
         var result = await _pumpService.GetSeriesOptionsAsync();
         //-----
         if (result != null)
-        {
             model.SeriesOptions = result;
-        }
         else
-        {
             model.SeriesOptions = new List<SelectListItem>();
-        }
 
         //-----
         model.IsCalculated = true;
@@ -50,7 +46,32 @@ public class CentrifugalPumpHistoryController : Controller
             model);
     }
 
+    //--------------------------------------------------
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Delete(int id)
+    {
+        await _historyService.DeleteAsync(id);
 
+        TempData["SuccessMessage"] = "Расчет успешно удален.";
+
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteAll()
+    {
+        await _historyService.DeleteAllAsync();
+
+        TempData["SuccessMessage"] =
+            "История расчетов полностью удалена.";
+
+        return RedirectToAction(nameof(Index));
+    }
+
+
+    //---------------------------------------------------
     [HttpGet]
     public async Task<IActionResult> Index()
     {

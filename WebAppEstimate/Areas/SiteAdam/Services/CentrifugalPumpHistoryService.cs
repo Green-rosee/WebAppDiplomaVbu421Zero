@@ -48,4 +48,27 @@ public class CentrifugalPumpHistoryService : ICentrifugalPumpHistoryService
             .OrderByDescending(h => h.CreatedAt)
             .ToListAsync();
     }
+
+    public async Task DeleteAsync(int id)
+    {
+        var item = await _dbcontext
+            .PumpCentrifugalHistories
+            .FindAsync(id);
+
+        if (item == null)
+            return;
+
+        _dbcontext.PumpCentrifugalHistories.Remove(item);
+
+        await _dbcontext.SaveChangesAsync();
+    }
+
+    public async Task DeleteAllAsync()
+    {
+        var items = await _dbcontext.PumpCentrifugalHistories.ToListAsync();
+
+        _dbcontext.PumpCentrifugalHistories.RemoveRange(items);
+
+        await _dbcontext.SaveChangesAsync();
+    }
 }
