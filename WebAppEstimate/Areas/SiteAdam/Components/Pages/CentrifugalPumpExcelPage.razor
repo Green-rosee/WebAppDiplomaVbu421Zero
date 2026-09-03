@@ -1,0 +1,128 @@
+
+@page "/SiteAdam/Excel"
+@rendermode InteractiveServer
+
+@using Syncfusion.Blazor.Spreadsheet
+
+@using WebAppEstimate.Areas.SiteAdam.Services
+
+@*@inject ICentrifugalPumpHistoryService HistoryService*@
+
+<h3>Итоговая таблица центробежных насосов</h3>
+
+@*<button @onclick="PrepareTable">
+    Загрузить данные
+    тут не удалось решить проблему выранивания пришлось совместить
+</button>*@
+<br/>
+<button @onclick="SetColumnWidths">
+    Выровнять столбцы
+</button>
+
+<button @onclick="LoadData">
+    Загрузить данные из БД
+</button>
+<br />
+<br />
+
+<SfSpreadsheet @ref="Spreadsheet"
+               Width="100%"
+               Height="600px">
+</SfSpreadsheet>
+
+@*@code
+{
+    private SfSpreadsheet Spreadsheet = null!;
+
+    private async Task LoadData()
+    {
+        var histories = await HistoryService.GetAllAsync();
+
+        await Spreadsheet.UpdateCellAsync(
+            "Sheet1!A1",
+            "Наименование");
+
+        await Spreadsheet.UpdateCellAsync(
+            "Sheet1!B1",
+            "Количество");
+
+        await Spreadsheet.UpdateCellAsync(
+            "Sheet1!C1",
+            "Стоимость часа");
+
+        await Spreadsheet.UpdateCellAsync(
+            "Sheet1!D1",
+            "Крылатка, мм");
+
+        await Spreadsheet.UpdateCellAsync(
+            "Sheet1!E1",
+            "Производительность, м³/ч");
+
+        await Spreadsheet.UpdateCellAsync(
+            "Sheet1!F1",
+            "Масса, кг");
+
+        await Spreadsheet.UpdateCellAsync(
+            "Sheet1!G1",
+            "Трудоёмкость");
+
+        await Spreadsheet.UpdateCellAsync(
+            "Sheet1!H1",
+            "Общая стоимость");
+
+        await Spreadsheet.UpdateCellAsync(
+            "Sheet1!I1",
+            "Дата");
+
+        var row = 2;
+
+        foreach (var item in histories)
+        {
+            await Spreadsheet.UpdateCellAsync(
+                $"Sheet1!A{row}",
+                item.Name);
+
+            await Spreadsheet.UpdateCellAsync(
+                $"Sheet1!B{row}",
+                item.Number);
+
+            await Spreadsheet.UpdateCellAsync(
+                $"Sheet1!C{row}",
+                item.CostHour);
+
+            await Spreadsheet.UpdateCellAsync(
+                $"Sheet1!D{row}",
+                item.Impeller);
+
+            await Spreadsheet.UpdateCellAsync(
+                $"Sheet1!E{row}",
+                item.Volume);
+
+            await Spreadsheet.UpdateCellAsync(
+                $"Sheet1!F{row}",
+                item.Weight);
+
+            await Spreadsheet.UpdateCellAsync(
+                $"Sheet1!G{row}",
+                item.TotalSumHour);
+
+            await Spreadsheet.UpdateCellAsync(
+                $"Sheet1!H{row}",
+                item.TotalSumCostHour);
+
+            await Spreadsheet.UpdateCellAsync(
+                $"Sheet1!I{row}",
+                item.CreatedAt
+                    .ToLocalTime()
+                    .ToString("dd.MM.yyyy HH:mm"));
+
+            row++;
+        }
+    }
+}*@
+
+
+
+
+
+

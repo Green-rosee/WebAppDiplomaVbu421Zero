@@ -1,9 +1,12 @@
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Syncfusion.Blazor;
+using WebAppEstimate.Areas.SiteAdam.Components;
 using WebAppEstimate.Areas.SiteAdam.Data.DbSetContext;
 using WebAppEstimate.Areas.SiteAdam.Models;
 using WebAppEstimate.Areas.SiteAdam.Pipeline;
 using WebAppEstimate.Areas.SiteAdam.Services;
+using WebAppEstimate.Areas.SiteAdam.Services.ExcelPumps;
 using WebAppEstimate.Data.DbContext;
 using WebAppEstimate.Pipeline;
 
@@ -30,11 +33,23 @@ builder.Services.AddControllersWithViews();
 //---
 builder.Services.AddScoped<ICentrifugalPumpService, CentrifugalPumpService>();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+//
 builder.Services.AddValidatorsFromAssemblyContaining<CentrifugalPumpModelValid>();
-builder.Services.AddScoped<ICentrifugalPumpHistoryService, CentrifugalPumpHistoryService>();
+builder.Services.AddScoped<ICentrifugalPumpHistoryService,
+    CentrifugalPumpHistoryService>();
+//
+builder.Services.AddScoped<ICentrifugalPumpExcelService,
+    CentrifugalPumpExcelService>();
 //---
 
+//---Добавить Blazor-Components
+builder.Services.AddRazorComponents()
+    .AddInteractiveServerComponents();
+//----Регестрация библиотеки для Excel
+builder.Services.AddSyncfusionBlazor();
+
 var app = builder.Build();
+
 //
 //---создание таблицы даных для авторизации входа на саты
 app.InitializeAuthorize();
@@ -62,6 +77,10 @@ app.MapControllerRoute(
         "default",
         "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
+//-----------
+app.MapRazorComponents<App>()
+    .AddInteractiveServerRenderMode();
+
 
 // 3. УНИВЕРСАЛЬНЫЙ МАРШРУТ ДЛЯ ВСЕХ ОБЛАСТЕЙ (ТЕКУЩИХ И БУДУЩИХ)
 /*

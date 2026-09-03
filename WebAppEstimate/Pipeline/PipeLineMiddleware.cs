@@ -26,13 +26,18 @@ public static class PipeLineMiddleware
 
         //--------------
         app.UseHttpsRedirection();
+        
+        app.UseStaticFiles();
         app.UseRouting();
         //---
         // --- ИСПРАВЛЕНИЕ 1: СТРОГИЙ ПОРЯДОК АУТЕНТИФИКАЦИИ ---
         app.UseAuthentication(); // КРИТИЧЕСКИ ВАЖНО! Сначала проверяем КТО пользователь (Проверяем Куки)
         app.UseAuthorization(); // Затем проверяем ЧТО ему разрешено (Проверяем роли, например, Admin)
-        //---
+        
+        //--- Нужно для Razor Components / Blazor
+        app.UseAntiforgery();
         //app.MapStaticAssets();
+        
 
         return app;
     }

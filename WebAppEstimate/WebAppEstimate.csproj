@@ -8,6 +8,7 @@
 
     <ItemGroup>
         <PackageReference Include="Bogus" Version="35.6.5"/>
+        <PackageReference Include="ClosedXML" Version="0.105.1" />
         <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.10"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.10">
@@ -15,9 +16,12 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="10.0.2"/>
+        <PackageReference Include="Syncfusion.Blazor.Spreadsheet" Version="34.2.6" />
+        <PackageReference Include="Syncfusion.Blazor.Themes" Version="34.2.6" />
     </ItemGroup>
 
     <ItemGroup>
+        <Folder Include="Areas\SiteAdam\Components\Layout\" />
         <Folder Include="Areas\SiteAdam\Data\Entity\Pumps\CentrifugalPumpsHistory\"/>
         <Folder Include="Areas\SiteAdam\Views\CentrifugalPumpHistory\"/>
         <Folder Include="Areas\SiteAdam\Views\CentrifugalPump\"/>
