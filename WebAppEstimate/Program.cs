@@ -10,6 +10,11 @@ using WebAppEstimate.Areas.SiteAdam.Services.ExcelPumps;
 using WebAppEstimate.Data.DbContext;
 using WebAppEstimate.Pipeline;
 
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
+using WebAppEstimate.Services;
+
 //-------------------------start
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,7 +27,11 @@ var adamConnectionString = builder.Configuration.GetConnectionString("dbSiteAdam
 builder.Services.AddDbContext<AppDbContextCentrifugalPump>(options => options.UseSqlite(adamConnectionString));
 //
 // Регистрируем аутентификацию через Куки
-builder.Services.ServiceAuthenticationCookies();
+//==================/*builder.Services.ServiceAuthenticationCookies();*/
+
+//Регистрируем аутентификацию через JWT-Token
+builder.Services.AddServiceAddJwtAuthentication();
+
 
 
 // Add services to the container.
@@ -40,6 +49,9 @@ builder.Services.AddScoped<ICentrifugalPumpHistoryService,
 //
 builder.Services.AddScoped<ICentrifugalPumpExcelService,
     CentrifugalPumpExcelService>();
+
+//----------Add Jwt Token-------------------
+builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 //---
 
 //---Добавить Blazor-Components
