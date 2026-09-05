@@ -10,24 +10,41 @@
 
 <h3>Итоговая таблица центробежных насосов</h3>
 
-@*<button @onclick="PrepareTable">
-    Загрузить данные
-    тут не удалось решить проблему выранивания пришлось совместить
-</button>*@
 <br/>
 <button @onclick="SetColumnWidths">
     Выровнять столбцы
 </button>
+<br/>
 
 <button @onclick="LoadData">
     Загрузить данные из БД
 </button>
-<br />
-<br />
+
+<button @onclick="SaveExcelToFolder">
+    Сохранить Excel в папку
+</button>
+
+<button @onclick="SaveContractExcel">
+    Сформировать контракт
+</button>
+
+<p>@SaveMessage</p>
+<br/>
+<br/>
 
 <SfSpreadsheet @ref="Spreadsheet"
                Width="100%"
-               Height="600px">
+               Height="600px"
+               
+               AllowEditing="true"
+               CellEditing="OnCellEditing"
+               CellSaved="OnCellSaved">
+
+    <SpreadsheetSheets>
+        <SpreadsheetSheet Name="Sheet1">
+        </SpreadsheetSheet>
+    </SpreadsheetSheets>
+    
 </SfSpreadsheet>
 
 @*@code

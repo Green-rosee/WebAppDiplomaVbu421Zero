@@ -29,6 +29,8 @@
         <Folder Include="Areas\SiteBram\Controllers\"/>
         <Folder Include="Areas\SiteBram\Data\"/>
         <Folder Include="Areas\SiteBram\Models\"/>
+        <Folder Include="ExcelFilesPageSave\CentrPumps\" />
+        <Folder Include="ExcelFilesPageSave\ContractsCentrPumps\" />
         <Folder Include="Views\Account\"/>
         <Folder Include="Views\Error\"/>
         <Folder Include="Views\Login\"/>
