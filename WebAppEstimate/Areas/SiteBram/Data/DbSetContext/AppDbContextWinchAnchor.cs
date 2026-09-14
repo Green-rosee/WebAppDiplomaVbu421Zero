@@ -3,24 +3,24 @@ using WebAppEstimate.Areas.SiteBram.Data.Entity.WinchAnchors;
 
 namespace WebAppEstimate.Areas.SiteBram.Data.DbSetContext;
 
-public class AppDbContextWinchAnchor:DbContext
+public class AppDbContextWinchAnchor : DbContext
 {
     public AppDbContextWinchAnchor()
     {
     }
 
-    public AppDbContextWinchAnchor(DbContextOptions options) : base(options)
+    public AppDbContextWinchAnchor(DbContextOptions<AppDbContextWinchAnchor> options) : base(options)
     {
     }
-    
+
     public DbSet<WinchAnchorSeries> WinchAnchorSeries { get; set; } = null!;
     public DbSet<WinchWeight> WinchWeights { get; set; } = null!;
     public DbSet<WinchChain> WinchChains { get; set; } = null!;
     public DbSet<WinchShaft> WinchShafts { get; set; } = null!;
 
     public DbSet<WinchAnchorDesign> WinchAnchorDesigns { get; set; } = null!;
-    
-    
+
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
