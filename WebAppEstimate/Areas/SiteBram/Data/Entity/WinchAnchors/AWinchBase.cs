@@ -2,9 +2,9 @@ namespace WebAppEstimate.Areas.SiteBram.Data.Entity.WinchAnchors;
 
 public abstract class AWinchBase
 {
-    public virtual int Id { get; set; }
+    public virtual Guid Id { get; set; } = Guid.NewGuid();
 
-    public virtual string Name { get; set; }=string.Empty;
+    public virtual string Name { get; set; } = string.Empty;
 
     public virtual int ValueKg { get; set; }
     public virtual int ValueMm { get; set; }

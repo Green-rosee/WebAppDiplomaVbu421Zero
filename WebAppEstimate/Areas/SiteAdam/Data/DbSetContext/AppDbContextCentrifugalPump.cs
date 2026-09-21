@@ -7,13 +7,17 @@ namespace WebAppEstimate.Areas.SiteAdam.Data.DbSetContext;
 public class AppDbContextCentrifugalPump : DbContext
 {
     //---
-    public AppDbContextCentrifugalPump()
+    /*public AppDbContextCentrifugalPump()
     {
-    }
+    }*/
 
-    public AppDbContextCentrifugalPump(DbContextOptions options) : base(options)
+    public AppDbContextCentrifugalPump(
+        DbContextOptions<AppDbContextCentrifugalPump> options)
+        : base(options)
     {
     }
+    
+    
 
     public DbSet<PumpSeries> PumpSeries { get; set; } = null!;
     public DbSet<PumpImpeller> PumpImpellers { get; set; } = null!;

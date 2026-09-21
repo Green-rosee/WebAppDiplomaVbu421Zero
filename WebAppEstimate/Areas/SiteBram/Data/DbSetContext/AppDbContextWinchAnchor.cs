@@ -5,9 +5,9 @@ namespace WebAppEstimate.Areas.SiteBram.Data.DbSetContext;
 
 public class AppDbContextWinchAnchor : DbContext
 {
-    public AppDbContextWinchAnchor()
+    /*public AppDbContextWinchAnchor()
     {
-    }
+    }*/
 
     public AppDbContextWinchAnchor(DbContextOptions<AppDbContextWinchAnchor> options) : base(options)
     {
@@ -25,6 +25,15 @@ public class AppDbContextWinchAnchor : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
+        //---для реализации множества таблиц TPC
+        modelBuilder.Entity<AWinchBase>()
+            .UseTpcMappingStrategy();
+        
+        modelBuilder.Entity<AWinchBase>()
+            .Property(x => x.Id)
+            .ValueGeneratedNever();
+        //----
+        
         modelBuilder.Entity<WinchAnchorDesign>()
             .HasOne(x => x.WinchAnchorSeries)
             .WithMany()
@@ -48,5 +57,23 @@ public class AppDbContextWinchAnchor : DbContext
             .WithMany()
             .HasForeignKey(x => x.WinchChainId)
             .OnDelete(DeleteBehavior.Restrict);
+        
+        modelBuilder.Entity<WinchWeight>()
+            .HasOne(w => w.WinchAnchorSeries)
+            .WithMany(s => s.Weights)
+            .HasForeignKey(w => w.WinchAnchorSeriesId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<WinchShaft>()
+            .HasOne(s => s.WinchAnchorSeries)
+            .WithMany(x => x.Shafts)
+            .HasForeignKey(s => s.WinchAnchorSeriesId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<WinchChain>()
+            .HasOne(c => c.WinchAnchorSeries)
+            .WithMany(s => s.Chains)
+            .HasForeignKey(c => c.WinchAnchorSeriesId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
