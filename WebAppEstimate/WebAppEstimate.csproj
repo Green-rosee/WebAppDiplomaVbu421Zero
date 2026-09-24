@@ -29,7 +29,6 @@
         <Folder Include="Areas\SiteAdam\Views\Home\"/>
         <Folder Include="Areas\SiteBram\Controllers\"/>
         <Folder Include="Areas\SiteBram\ExcelFileLoad\WinchAnchorExcel\"/>
-        <Folder Include="Areas\SiteBram\Models\"/>
         <Folder Include="ExcelFilesPageSave\CentrPumps\"/>
         <Folder Include="ExcelFilesPageSave\ContractsCentrPumps\"/>
         <Folder Include="Views\Account\"/>

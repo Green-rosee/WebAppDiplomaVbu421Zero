@@ -3,19 +3,196 @@
     ViewData["HomeIndex"] = "Index";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Index Page</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-    <h5>Areas Site Bram Home Page View Index</h5>
-    <li class="nav-item">
-        <a class="nav-link text-dark" asp-area="" asp-controller="" asp-action="">___Log In___</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link text-dark" asp-area="" asp-controller="" asp-action="">___Sign Up___</a>
-    </li>
+<style>
+    .winch-card {
+        aspect-ratio: 1 / 1;
+        border: 1px solid #dee2e6;
+        border-radius: 18px;
+        transition: transform 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease;
+        background: #ffffff;
+    }
+
+    .winch-card:hover {
+        transform: translateY(-6px) scale(1.02);
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+        border-color: #adb5bd;
+    }
+
+    .winch-card-icon {
+        font-size: 3rem;
+        margin-bottom: 20px;
+    }
+
+    .winch-card-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+
+    .winch-card-text {
+        font-size: 0.95rem;
+    }
+
+    .winch-link {
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .winch-link:hover {
+        color: inherit;
+    }
+</style>
+
+<div class="container py-5">
+
+    <div class="text-center mb-5">
+        <h1 class="display-5 fw-semibold">
+            Лебёдки
+        </h1>
+
+        <p class="text-muted fs-5">
+            Выберите тип оборудования
+        </p>
+    </div>
+
+    <div class="row justify-content-center g-4">
+
+        <!-- Якорная -->
+        <div class="col-12 col-sm-6 col-lg-5">
+
+            <a href="/SiteBram/WinchAnchor"
+               class="winch-link">
+
+                <div class="winch-card
+                            d-flex
+                            flex-column
+                            justify-content-center
+                            align-items-center
+                            text-center
+                            p-4">
+
+                    <div class="winch-card-icon">
+                        ⚓
+                    </div>
+
+                    <h3 class="winch-card-title">
+                        Якорная лебёдка
+                    </h3>
+
+                    <p class="winch-card-text text-muted mt-2">
+                        Расчёт и выбор якорной лебёдки
+                    </p>
+
+                </div>
+
+            </a>
+
+        </div>
+
+        <!-- Швартовая -->
+        <div class="col-12 col-sm-6 col-lg-5">
+
+            <a href="#"
+               class="winch-link">
+
+                <div class="winch-card
+                            d-flex
+                            flex-column
+                            justify-content-center
+                            align-items-center
+                            text-center
+                            p-4">
+
+                    <div class="winch-card-icon">
+                        🪢
+                    </div>
+
+                    <h3 class="winch-card-title">
+                        Швартовая лебёдка
+                    </h3>
+
+                    <p class="winch-card-text text-muted mt-2">
+                        Расчёт и выбор швартовой лебёдки
+                    </p>
+
+                </div>
+
+            </a>
+
+        </div>
+
+        <!-- Буксирная -->
+        <div class="col-12 col-sm-6 col-lg-5">
+
+            <a href="#"
+               class="winch-link">
+
+                <div class="winch-card
+                            d-flex
+                            flex-column
+                            justify-content-center
+                            align-items-center
+                            text-center
+                            p-4">
+
+                    <div class="winch-card-icon">
+                        🚢
+                    </div>
+
+                    <h3 class="winch-card-title">
+                        Буксирная лебёдка
+                    </h3>
+
+                    <p class="winch-card-text text-muted mt-2">
+                        Расчёт и выбор буксирной лебёдки
+                    </p>
+
+                </div>
+
+            </a>
+
+        </div>
+
+        <!-- Грузовая -->
+        <div class="col-12 col-sm-6 col-lg-5">
+
+            <a href="#"
+               class="winch-link">
+
+                <div class="winch-card
+                            d-flex
+                            flex-column
+                            justify-content-center
+                            align-items-center
+                            text-center
+                            p-4">
+
+                    <div class="winch-card-icon">
+                        🏗️
+                    </div>
+
+                    <h3 class="winch-card-title">
+                        Грузовая лебёдка
+                    </h3>
+
+                    <p class="winch-card-text text-muted mt-2">
+                        Расчёт и выбор грузовой лебёдки
+                    </p>
+
+                </div>
+
+            </a>
+
+        </div>
+
+    </div>
+
 </div>
 
 @section Footer
 {
     ...Идет разработка приложения...
 }
+
+

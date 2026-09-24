@@ -1,0 +1,168 @@
+@page "/SiteBram/WinchAnchor"
+@rendermode InteractiveServer
+
+<div class="container py-5">
+
+    <div class="text-center mb-5">
+        <h1 class="display-6 fw-semibold">
+            Расчёт якорной лебёдки
+        </h1>
+
+        <p class="text-muted">
+            Выберите параметры лебёдки и выполните расчёт
+        </p>
+    </div>
+
+
+    <div class="card shadow-sm border-0 mx-auto"
+         style="max-width: 900px;">
+
+        <div class="card-body p-4">
+
+            <div class="row g-4">
+
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">
+                        Серия лебёдки
+                    </label>
+
+                    <select class="form-select form-select-lg"
+                            @bind="SelectedSeriesId">
+
+                        <option value="">
+                            Выберите серию.
+                        </option>
+
+                        @foreach (var series in Series)
+                        {
+                            <option value="@series.Id">
+                                @series.Name
+                            </option>
+                        }
+
+                    </select>
+                </div>
+
+
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">
+                        Масса, кг.
+                    </label>
+
+                    <InputNumber class="form-control form-control-lg"
+                                 @bind-Value="ValueKg"/>
+                </div>
+
+
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">
+                        Диаметр вала, мм.
+                    </label>
+
+                    <InputNumber class="form-control form-control-lg"
+                                 @bind-Value="ValueMm"/>
+                </div>
+
+
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">
+                        Калибр цепи, мм.
+                    </label>
+
+                    <InputNumber class="form-control form-control-lg"
+                                 @bind-Value="ValueKgMm"/>
+                </div>
+
+            </div>
+
+
+            <hr class="my-4"/>
+
+
+            <div class="d-flex flex-wrap gap-3">
+
+                <button class="btn btn-primary btn-lg px-4"
+                        @onclick="CalculateAsync">
+                    Рассчитать
+                </button>
+
+                <button class="btn btn-success btn-lg px-4"
+                        @onclick="SaveAsync"
+                        disabled="@(!CanSave)">
+                    Сохранить
+                </button>
+
+                <button class="btn btn-outline-secondary btn-lg px-4"
+                        @onclick="Clear">
+                    Очистить
+                </button>
+
+                <button class="btn btn-check btn-lg px-4"
+                        @onclick="#">
+                    Вывести на страницу
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+
+
+    @if (Result is not null)
+    {
+        <div class="card shadow-sm border-0 mx-auto mt-4"
+             style="max-width: 900px;">
+
+            <div class="card-header bg-light py-3">
+                <h5 class="mb-0">
+                    Результат расчёта
+                </h5>
+            </div>
+
+            <div class="card-body p-4">
+
+                <div class="row g-3">
+
+                    <div class="col-md-12">
+                        <strong>Наименование:</strong>
+                        @Result.Name
+                    </div>
+
+                    <div class="col-md-6">
+                        <strong>Масса:</strong>
+                        @Result.ValueKg кг
+                    </div>
+
+                    <div class="col-md-6">
+                        <strong>Диаметр вала:</strong>
+                        @Result.ValueMm мм
+                    </div>
+
+                    <div class="col-md-6">
+                        <strong>Цепь:</strong>
+                        @Result.ValueKgMm
+                    </div>
+
+                    <div class="col-md-6">
+                        <strong>Трудоёмкость:</strong>
+                        @Result.Hour.ToString("0.00") ч
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    }
+
+
+    @if (!string.IsNullOrWhiteSpace(Message))
+    {
+        <div class="alert alert-info mx-auto mt-4"
+             style="max-width: 900px;">
+
+            @Message
+
+        </div>
+    }
+
+</div>

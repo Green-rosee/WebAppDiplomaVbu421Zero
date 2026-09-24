@@ -1,12 +1,12 @@
 using FluentValidation;
 using Syncfusion.Blazor;
-using WebAppEstimate.Areas.SiteAdam.Components;
 using WebAppEstimate.Areas.SiteAdam.Models;
 using WebAppEstimate.Areas.SiteAdam.Pipeline;
 using WebAppEstimate.Areas.SiteAdam.Services;
 using WebAppEstimate.Areas.SiteAdam.Services.ExcelPumps;
 using WebAppEstimate.Areas.SiteBram.Pipeline;
 using WebAppEstimate.Areas.SiteBram.Services;
+using WebAppEstimate.Components;
 using WebAppEstimate.Pipeline;
 using WebAppEstimate.Services;
 
@@ -34,6 +34,8 @@ builder.Services.AddScoped<ICentrifugalPumpHistoryService,
 builder.Services.AddScoped<ICentrifugalPumpExcelService,
     CentrifugalPumpExcelService>();
 builder.Services.AddScoped<IWinchExcelImportService, WinchAnchorExcelImportService>();
+//
+builder.Services.AddScoped<IWinchAnchorService, WinchAnchorService>();
 
 //----------Add Jwt Token-------------------
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
@@ -78,6 +80,8 @@ app.MapControllerRoute(
 //-----------
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+/*app.MapRazorComponents<AppBram>()
+    .AddInteractiveServerRenderMode();*/
 
 
 // 3. УНИВЕРСАЛЬНЫЙ МАРШРУТ ДЛЯ ВСЕХ ОБЛАСТЕЙ (ТЕКУЩИХ И БУДУЩИХ)
