@@ -1,9 +1,11 @@
+using BlazorDatasheet.Extensions;
 using FluentValidation;
 using Syncfusion.Blazor;
 using WebAppEstimate.Areas.SiteAdam.Models;
 using WebAppEstimate.Areas.SiteAdam.Pipeline;
 using WebAppEstimate.Areas.SiteAdam.Services;
 using WebAppEstimate.Areas.SiteAdam.Services.ExcelPumps;
+using WebAppEstimate.Areas.SiteBram.Models;
 using WebAppEstimate.Areas.SiteBram.Pipeline;
 using WebAppEstimate.Areas.SiteBram.Services;
 using WebAppEstimate.Components;
@@ -36,6 +38,13 @@ builder.Services.AddScoped<ICentrifugalPumpExcelService,
 builder.Services.AddScoped<IWinchExcelImportService, WinchAnchorExcelImportService>();
 //
 builder.Services.AddScoped<IWinchAnchorService, WinchAnchorService>();
+builder.Services.AddScoped<WinchAnchorExcelState>();
+builder.Services.AddScoped<
+    IWinchAnchorHistoryService, 
+        WinchAnchorHistoryService>();
+builder.Services.AddScoped<
+    IWinchAnchorExcelExportService,
+        WinchAnchorExcelExportService>();
 
 //----------Add Jwt Token-------------------
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
@@ -46,6 +55,7 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 //----Регестрация библиотеки для Excel
 builder.Services.AddSyncfusionBlazor();
+builder.Services.AddBlazorDatasheet();
 
 var app = builder.Build();
 

@@ -27,11 +27,33 @@ public class WinchAnchorService : IWinchAnchorService
         int valueMm,
         int valueKgMm)
     {
-        return await _context.WinchAnchorDesigns
-            .FirstOrDefaultAsync(x =>
-                x.WinchAnchorSeriesId == seriesId &&
-                x.ValueKg == valueKg &&
-                x.ValueMm == valueMm &&
-                x.ValueKgMm == valueKgMm);
+        var designs = await _context.WinchAnchorDesigns
+            .Where(x => x.WinchAnchorSeriesId == seriesId)
+            .ToListAsync();
+
+        if (designs.Count == 0)
+            return null;
+
+        var closestKg = designs
+            .OrderBy(x => Math.Abs(x.ValueKg - valueKg))
+            .First()
+            .ValueKg;
+
+        var closestByKg = designs
+            .Where(x => x.ValueKg == closestKg)
+            .ToList();
+
+        var closestMm = closestByKg
+            .OrderBy(x => Math.Abs(x.ValueMm - valueMm))
+            .First()
+            .ValueMm;
+
+        var closestByKgAndMm = closestByKg
+            .Where(x => x.ValueMm == closestMm)
+            .ToList();
+
+        return closestByKgAndMm
+            .OrderBy(x => Math.Abs(x.ValueKgMm - valueKgMm))
+            .FirstOrDefault();
     }
 }

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using WebAppEstimate.Areas.SiteBram.Data.Entity.WinchAnchors;
+using WebAppEstimate.Areas.SiteBram.Models;
 using WebAppEstimate.Areas.SiteBram.Services;
 //using WebAppEstimate.Areas.SiteBram.Entity;
 
@@ -7,6 +8,18 @@ namespace WebAppEstimate.Areas.SiteBram.Components.Pages;
 
 public partial class WinchAnchorPage
 {
+    [Inject]
+    private IWinchAnchorHistoryService HistoryService { get; set; } = null!;
+
+    private Guid? _savedCalculationId;
+    //------------
+    
+    /*[Inject]
+    private WinchAnchorExcelState ExcelState { get; set; } = null!;*/
+
+    [Inject]
+    private NavigationManager NavigationManager { get; set; } = null!;
+    
     [Inject] private IWinchAnchorService WinchAnchorService { get; set; } = null!;
 
     protected List<WinchAnchorSeries> Series { get; set; } = new();
@@ -23,9 +36,24 @@ public partial class WinchAnchorPage
 
     protected string Message { get; set; } = string.Empty;
 
-    protected bool CanSave => Result != null;
+    //protected bool CanSave => Result != null;
+    
+    protected decimal HourCost { get; set; }
 
+    protected decimal TotalCost =>
+        Result is null
+            ? 0
+            : (decimal)Result.Hour * HourCost;
+    
+    protected bool CanSave =>
+        Result != null && HourCost > 0;
+    
+    protected string WinchName { get; set; } = string.Empty;
+    
+    protected bool CanShowExcel =>
+        _savedCalculationId != null;
 
+    //--------------------------------------------------
     protected override async Task OnInitializedAsync()
     {
         Series = await WinchAnchorService.GetSeriesAsync();
@@ -55,17 +83,48 @@ public partial class WinchAnchorPage
     }
 
 
-    protected Task SaveAsync()
+    protected async Task SaveAsync()
     {
-        if (Result == null)
-            return Task.CompletedTask;
+        if (Result == null || SelectedSeriesId == null)
+            return;
 
-        // Позже здесь сделаем сохранение результата
-        // в History, как у центробежных насосов.
+        var seriesName = Series
+            .FirstOrDefault(x => x.Id == SelectedSeriesId.Value)?
+            .Name ?? string.Empty;
 
-        Message = "Результат подготовлен к сохранению.";
+        var history = new WinchAnchorCalculationHistory
+        {
+            WinchName = WinchName,
+
+            WinchAnchorSeriesId = SelectedSeriesId.Value,
+            SeriesName = seriesName,
+
+            InputValueKg = ValueKg,
+            InputValueMm = ValueMm,
+            InputValueKgMm = ValueKgMm,
+
+            SelectedValueKg = Result.ValueKg,
+            SelectedValueMm = Result.ValueMm,
+            SelectedValueKgMm = Result.ValueKgMm,
+
+            Hour = Result.Hour,
+            HourCost = HourCost,
+            TotalCost = TotalCost
+        };
+
+        _savedCalculationId =
+            await HistoryService.SaveAsync(history);
+
+        Message = "Расчёт сохранён.";
+    }
+    
+    protected  Task ShowExcel()
+    {
+        NavigationManager.NavigateTo(
+            "/SiteBram/WinchAnchor/Sheet");
 
         return Task.CompletedTask;
+        
     }
 
 
@@ -75,9 +134,14 @@ public partial class WinchAnchorPage
 
         ValueKg = 0;
         ValueMm = 0;
-        ValueKgMm = 0;
-
+        ValueKgMm = 0;  
+        HourCost = 0;
+        
         Result = null;
         Message = string.Empty;
+        WinchName = string.Empty;
+        
+        _savedCalculationId = null;
+       
     }
 }

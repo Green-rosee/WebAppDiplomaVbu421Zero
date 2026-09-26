@@ -5,9 +5,7 @@ namespace WebAppEstimate.Areas.SiteBram.Data.DbSetContext;
 
 public class AppDbContextWinchAnchor : DbContext
 {
-    /*public AppDbContextWinchAnchor()
-    {
-    }*/
+    
 
     public AppDbContextWinchAnchor(DbContextOptions<AppDbContextWinchAnchor> options) : base(options)
     {
@@ -19,6 +17,9 @@ public class AppDbContextWinchAnchor : DbContext
     public DbSet<WinchShaft> WinchShafts { get; set; } = null!;
 
     public DbSet<WinchAnchorDesign> WinchAnchorDesigns { get; set; } = null!;
+    
+    //----сохранение в БД 
+    public DbSet<WinchAnchorCalculationHistory> WinchAnchorCalculationHistories { get; set; } = null;
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

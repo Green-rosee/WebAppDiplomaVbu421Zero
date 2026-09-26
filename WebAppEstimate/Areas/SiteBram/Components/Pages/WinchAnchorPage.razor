@@ -23,6 +23,15 @@
 
                 <div class="col-md-6">
                     <label class="form-label fw-semibold">
+                        Название лебёдки / проекта
+                    </label>
+
+                    <InputText class="form-control form-control-lg"
+                               @bind-Value="WinchName" />
+                </div>
+                
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">
                         Серия лебёдки
                     </label>
 
@@ -72,6 +81,15 @@
                     <InputNumber class="form-control form-control-lg"
                                  @bind-Value="ValueKgMm"/>
                 </div>
+                
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">
+                        Стоимость часа
+                    </label>
+
+                    <InputNumber class="form-control form-control-lg"
+                                 @bind-Value="HourCost" />
+                </div>
 
             </div>
 
@@ -97,9 +115,9 @@
                     Очистить
                 </button>
 
-                <button class="btn btn-check btn-lg px-4"
-                        @onclick="#">
-                    Вывести на страницу
+                <button class="btn btn-info btn-lg px-4"
+                        @onclick="ShowExcel">
+                    Открыть Excel-таблицу даных из БД
                 </button>
 
             </div>
@@ -146,6 +164,16 @@
                     <div class="col-md-6">
                         <strong>Трудоёмкость:</strong>
                         @Result.Hour.ToString("0.00") ч
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <strong>Стоимость часа:</strong>
+                        @HourCost.ToString("0.00")
+                    </div>
+
+                    <div class="col-md-12">
+                        <strong>Итоговая стоимость:</strong>
+                        @TotalCost.ToString("0.00")
                     </div>
 
                 </div>
