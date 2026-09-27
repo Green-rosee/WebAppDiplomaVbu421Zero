@@ -9,7 +9,7 @@
         </h1>
 
         <p class="text-muted">
-            Выберите параметры лебёдки и выполните расчёт
+            Выберите параметры лебёдки и выполните расчёт.
         </p>
     </div>
 
@@ -27,9 +27,9 @@
                     </label>
 
                     <InputText class="form-control form-control-lg"
-                               @bind-Value="WinchName" />
+                               @bind-Value="WinchName"/>
                 </div>
-                
+
                 <div class="col-md-6">
                     <label class="form-label fw-semibold">
                         Серия лебёдки
@@ -81,14 +81,14 @@
                     <InputNumber class="form-control form-control-lg"
                                  @bind-Value="ValueKgMm"/>
                 </div>
-                
+
                 <div class="col-md-6">
                     <label class="form-label fw-semibold">
                         Стоимость часа
                     </label>
 
                     <InputNumber class="form-control form-control-lg"
-                                 @bind-Value="HourCost" />
+                                 @bind-Value="HourCost"/>
                 </div>
 
             </div>
@@ -165,7 +165,7 @@
                         <strong>Трудоёмкость:</strong>
                         @Result.Hour.ToString("0.00") ч
                     </div>
-                    
+
                     <div class="col-md-6">
                         <strong>Стоимость часа:</strong>
                         @HourCost.ToString("0.00")

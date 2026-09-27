@@ -11,24 +11,67 @@ public static class ServiceDatabaseRegistration
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        var baseConnectionString =
-            configuration.GetConnectionString("dbSiteBaseConnection");
+        var provider =
+            configuration["DatabaseProvider"] ?? "Sqlite";
 
-        services.AddDbContext<AppDbContext>(
-            options => options.UseSqlite(baseConnectionString));
+        var baseConnectionString =
+            configuration.GetConnectionString(
+                "dbSiteBaseConnection");
 
         var adamConnectionString =
-            configuration.GetConnectionString("dbSiteAdamConnection");
-
-        services.AddDbContext<AppDbContextCentrifugalPump>(
-            options => options.UseSqlite(adamConnectionString));
+            configuration.GetConnectionString(
+                "dbSiteAdamConnection");
 
         var bramConnectionString =
-            configuration.GetConnectionString("dbSiteBramConnection");
+            configuration.GetConnectionString(
+                "dbSiteBramConnection");
 
-        services.AddDbContext<AppDbContextWinchAnchor>(
-            options => options.UseSqlite(bramConnectionString));
+        if (provider.Equals(
+                "Postgres",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            services.AddDbContext<AppDbContext>(options =>
+                options.UseNpgsql(baseConnectionString));
+
+            services.AddDbContext<AppDbContextCentrifugalPump>(options =>
+                options.UseNpgsql(adamConnectionString));
+
+            services.AddDbContext<AppDbContextWinchAnchor>(options =>
+                options.UseNpgsql(bramConnectionString));
+        }
+        else
+        {
+            services.AddDbContext<AppDbContext>(options =>
+                options.UseSqlite(baseConnectionString));
+
+            services.AddDbContext<AppDbContextCentrifugalPump>(options =>
+                options.UseSqlite(adamConnectionString));
+
+            services.AddDbContext<AppDbContextWinchAnchor>(options =>
+                options.UseSqlite(bramConnectionString));
+        }
 
         return services;
     }
+
+    //-----------------
+    /*var baseConnectionString =
+        configuration.GetConnectionString("dbSiteBaseConnection");
+
+    services.AddDbContext<AppDbContext>(
+        options => options.UseSqlite(baseConnectionString));
+
+    var adamConnectionString =
+        configuration.GetConnectionString("dbSiteAdamConnection");
+
+    services.AddDbContext<AppDbContextCentrifugalPump>(
+        options => options.UseSqlite(adamConnectionString));
+
+    var bramConnectionString =
+        configuration.GetConnectionString("dbSiteBramConnection");
+
+    services.AddDbContext<AppDbContextWinchAnchor>(
+        options => options.UseSqlite(bramConnectionString));
+
+    return services;*/
 }

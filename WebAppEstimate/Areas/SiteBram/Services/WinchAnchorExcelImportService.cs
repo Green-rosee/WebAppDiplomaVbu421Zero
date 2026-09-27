@@ -19,53 +19,40 @@ public class WinchAnchorExcelImportService : IWinchExcelImportService
     public async Task ImportAsync()
     {
         Console.WriteLine("=== Winch Excel import started ===");
+
         var filePath = Path.Combine(
             _environment.ContentRootPath,
             "Areas",
-                "SiteBram",
-                    "ExcelFileLoad",
-                        "WinchAnchorExcel",
-                            "WinchAnchorTest.xlsx"
+            "SiteBram",
+            "ExcelFileLoad",
+            "WinchAnchorExcel",
+            "WinchAnchorTest.xlsx"
         );
-        
-        /*Console.WriteLine($"Excel path: {filePath}");
-        Console.WriteLine($"Excel exists: {File.Exists(filePath)}");*/
+
+        if (!File.Exists(filePath))
+            throw new FileNotFoundException(
+                $"Excel file not found: {filePath}");
 
         using var workbook = new XLWorkbook(filePath);
 
         await ImportSeriesAsync(workbook);
-            await ImportWeightsAsync(workbook);
-            
-            /*Console.WriteLine(
-                $"Weights tracked: {_context.ChangeTracker.Entries<WinchWeight>().Count()}");*/
-            
-                await ImportShaftsAsync(workbook);
-                
-                /*Console.WriteLine(
-                    $"Shafts tracked: {_context.ChangeTracker.Entries<WinchShaft>().Count()}");*/
-                
-                    await ImportChainsAsync(workbook);
-                    
-                    /*Console.WriteLine(
-                        $"Chains tracked: {_context.ChangeTracker.Entries<WinchChain>().Count()}");*/
-                    
-                    /*var saved = await _context.SaveChangesAsync();*/
+        await ImportWeightsAsync(workbook);
+        await ImportShaftsAsync(workbook);
+        await ImportChainsAsync(workbook);
 
-                    /*Console.WriteLine($"Weight/Shaft/Chain saved: {saved}");*/
-                    
         await _context.SaveChangesAsync();
-            await ImportDesignsAsync(workbook);
-        
+        await ImportDesignsAsync(workbook);
+
         Console.WriteLine("=== Winch Excel import finished ===");
     }
 
     private async Task ImportSeriesAsync(XLWorkbook workbook)
     {
         var worksheet = workbook.Worksheet("Series");
-            var rows = worksheet.RowsUsed().Skip(1);
-                var existingNames = await _context.WinchAnchorSeries
-                    .Select(x => x.Name)
-                        .ToListAsync();
+        var rows = worksheet.RowsUsed().Skip(1);
+        var existingNames = await _context.WinchAnchorSeries
+            .Select(x => x.Name)
+            .ToListAsync();
 
         foreach (var row in rows)
         {
@@ -74,10 +61,10 @@ public class WinchAnchorExcelImportService : IWinchExcelImportService
                 $"A='{row.Cell(1).GetString()}' | " +
                 $"B='{row.Cell(2).GetString()}' | " +
                 $"C='{row.Cell(3).GetString()}'");*/
-            
+
             var seriesName = row.Cell(1).GetString().Trim();
             Console.WriteLine($"SERIES: '{seriesName}'");
-            
+
             if (string.IsNullOrWhiteSpace(seriesName))
                 continue;
 
@@ -98,7 +85,7 @@ public class WinchAnchorExcelImportService : IWinchExcelImportService
 
         /*var saved = await _context.SaveChangesAsync();
         Console.WriteLine($"Series saved: {saved}");*/
-        
+
         await _context.SaveChangesAsync();
     }
 
@@ -116,14 +103,14 @@ public class WinchAnchorExcelImportService : IWinchExcelImportService
         foreach (var row in rows)
         {
             var seriesName = row.Cell(1).GetString().Trim();
-            
+
             /*Console.WriteLine($"WEIGHT: '{seriesName}'");*/
-            
+
             if (string.IsNullOrWhiteSpace(seriesName))
                 continue;
 
             var valueKg = row.Cell(2).GetValue<int>();
-                var hour = row.Cell(3).GetValue<double>();
+            var hour = row.Cell(3).GetValue<double>();
 
             if (!seriesDictionary.TryGetValue(
                     seriesName,
@@ -133,15 +120,15 @@ public class WinchAnchorExcelImportService : IWinchExcelImportService
             var weight = new WinchWeight
             {
                 Name = seriesName,
-                    ValueKg = valueKg,
-                        Hour = hour,
-                            WinchAnchorSeriesId = seriesId
+                ValueKg = valueKg,
+                Hour = hour,
+                WinchAnchorSeriesId = seriesId
             };
 
             _context.WinchWeights.Add(weight);
         }
     }
-    
+
     private async Task ImportShaftsAsync(XLWorkbook workbook)
     {
         var worksheet = workbook.Worksheet("Shaft");
@@ -156,21 +143,19 @@ public class WinchAnchorExcelImportService : IWinchExcelImportService
         foreach (var row in rows)
         {
             var seriesName = row.Cell(1).GetString().Trim();
-            
+
             /*Console.WriteLine($"SHAFT: '{seriesName}'");*/
-            
+
             if (string.IsNullOrWhiteSpace(seriesName))
                 continue;
 
             var valueMm = row.Cell(2).GetValue<int>();
-                var hour = row.Cell(3).GetValue<double>();
+            var hour = row.Cell(3).GetValue<double>();
 
             if (!seriesDictionary.TryGetValue(
                     seriesName,
                     out var seriesId))
-            {
                 continue;
-            }
 
             var shaft = new WinchShaft
             {
@@ -183,7 +168,7 @@ public class WinchAnchorExcelImportService : IWinchExcelImportService
             _context.WinchShafts.Add(shaft);
         }
     }
-    
+
     private async Task ImportChainsAsync(XLWorkbook workbook)
     {
         var worksheet = workbook.Worksheet("Chain");
@@ -198,9 +183,9 @@ public class WinchAnchorExcelImportService : IWinchExcelImportService
         foreach (var row in rows)
         {
             var seriesName = row.Cell(1).GetString().Trim();
-            
+
             /*Console.WriteLine($"CHAIN: '{seriesName}'");*/
-            
+
             if (string.IsNullOrWhiteSpace(seriesName))
                 continue;
 
@@ -210,9 +195,7 @@ public class WinchAnchorExcelImportService : IWinchExcelImportService
             if (!seriesDictionary.TryGetValue(
                     seriesName,
                     out var seriesId))
-            {
                 continue;
-            }
 
             var chain = new WinchChain
             {
@@ -229,18 +212,18 @@ public class WinchAnchorExcelImportService : IWinchExcelImportService
     private async Task ImportDesignsAsync(XLWorkbook workbook)
     {
         var worksheet = workbook.Worksheet("Design");
-            var rows = worksheet.RowsUsed().Skip(1);
+        var rows = worksheet.RowsUsed().Skip(1);
 
         foreach (var row in rows)
         {
             var seriesName = row.Cell(1).GetString().Trim();
-            
+
             if (string.IsNullOrWhiteSpace(seriesName))
                 continue;
 
             var valueKg = row.Cell(2).GetValue<int>();
-                var valueMm = row.Cell(3).GetValue<int>();
-                    var valueKgMm = row.Cell(4).GetValue<int>();
+            var valueMm = row.Cell(3).GetValue<int>();
+            var valueKgMm = row.Cell(4).GetValue<int>();
 
             var series = await _context.WinchAnchorSeries
                 .FirstOrDefaultAsync(x => x.Name == seriesName);
@@ -266,9 +249,7 @@ public class WinchAnchorExcelImportService : IWinchExcelImportService
             if (weight == null ||
                 shaft == null ||
                 chain == null)
-            {
                 continue;
-            }
 
             var designExists = await _context.WinchAnchorDesigns
                 .AnyAsync(x =>
@@ -279,11 +260,11 @@ public class WinchAnchorExcelImportService : IWinchExcelImportService
 
             if (designExists)
                 continue;
-            
+
             var design = new WinchAnchorDesign
             {
                 Name = $"{seriesName}-{valueKg}-{valueMm}-{valueKgMm}",
-                
+
                 ValueKg = valueKg,
                 ValueMm = valueMm,
                 ValueKgMm = valueKgMm,

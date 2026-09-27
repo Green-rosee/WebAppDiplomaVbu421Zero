@@ -7,7 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="BlazorDatasheet" Version="0.17.2" />
+        <PackageReference Include="BlazorDatasheet" Version="0.17.2"/>
         <PackageReference Include="Bogus" Version="35.6.5"/>
         <PackageReference Include="ClosedXML" Version="0.105.1"/>
         <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1"/>
@@ -18,6 +18,7 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="10.0.2"/>
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3"/>
         <PackageReference Include="Syncfusion.Blazor.Spreadsheet" Version="34.2.6"/>
         <PackageReference Include="Syncfusion.Blazor.Themes" Version="34.2.6"/>
     </ItemGroup>
@@ -32,18 +33,19 @@
         <Folder Include="Areas\SiteBram\ExcelFileLoad\WinchAnchorExcel\"/>
         <Folder Include="ExcelFilesPageSave\CentrPumps\"/>
         <Folder Include="ExcelFilesPageSave\ContractsCentrPumps\"/>
-        <Folder Include="ExcelFilesPageSave\WinchAnchor\" />
+        <Folder Include="ExcelFilesPageSave\WinchAnchor\"/>
         <Folder Include="Views\Account\"/>
         <Folder Include="Views\Error\"/>
         <Folder Include="Views\Login\"/>
     </ItemGroup>
 
-    <!--
     <ItemGroup>
-         <AdditionalFiles Include="Areas\SiteBram\Views\Home\Index.cshtml"/>
-        <AdditionalFiles Include="Areas\SiteBram\Views\Shared\_Layout.cshtml"/>
+        <Content Include="Areas\SiteBram\ExcelFileLoad\WinchAnchorExcel\WinchAnchorTest.xlsx">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+        </Content>
     </ItemGroup>
-        -->
+
 
     <ItemGroup>
         <_ContentIncludedByDefault Remove="Areas\SiteAdam\Views\Login\Login.cshtml"/>
