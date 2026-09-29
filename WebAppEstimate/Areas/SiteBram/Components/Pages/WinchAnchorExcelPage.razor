@@ -1,0 +1,56 @@
+@page "/SiteBram/WinchAnchor/Excel"
+@rendermode InteractiveServer
+
+<div class="container py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <h2 class="mb-0">
+            Сохранённые расчёты якорных лебёдок
+        </h2>
+
+        <div class="d-flex gap-2">
+
+            <button class="btn btn-primary"
+                    @onclick="RefreshAsync"
+                    disabled="@IsLoading">
+                Обновить данные
+            </button>
+
+            <button class="btn btn-success"
+                    @onclick="SaveExcelAsync"
+                    disabled="@IsLoading">
+                Сохранить Excel
+            </button>
+
+        </div>
+
+    </div>
+
+
+    @if (!string.IsNullOrWhiteSpace(Message))
+    {
+        <div class="alert alert-info mb-3">
+            @Message
+        </div>
+    }
+
+
+    @if (IsLoading)
+    {
+        <div class="alert alert-secondary">
+            Загрузка данных...
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+
+                <Datasheet Sheet="@Sheet" />
+
+            </div>
+        </div>
+    }
+
+</div>

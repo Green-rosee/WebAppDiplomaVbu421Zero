@@ -91,6 +91,15 @@
                                  @bind-Value="HourCost"/>
                 </div>
 
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">
+                        Количество, шт.
+                    </label>
+
+                    <InputNumber class="form-control form-control-lg"
+                                 @bind-Value="Quantity"/>
+                </div>
+
             </div>
 
 
@@ -115,10 +124,12 @@
                     Очистить
                 </button>
 
-                <button class="btn btn-info btn-lg px-4"
-                        @onclick="ShowExcel">
-                    Открыть Excel-таблицу даных из БД
-                </button>
+                <a class="btn btn-info btn-lg px-4"
+                   href="/SiteBram/WinchAnchor/Excel"
+                   target="_blank">
+                        @*@onclick="ShowExcel">*@
+                    Открыть Excel-таблицу:
+                </a>
 
             </div>
 
@@ -147,18 +158,18 @@
                     </div>
 
                     <div class="col-md-6">
-                        <strong>Масса:</strong>
+                        <strong>Подобранный Масса:</strong>
                         @Result.ValueKg кг
                     </div>
 
                     <div class="col-md-6">
-                        <strong>Диаметр вала:</strong>
+                        <strong>Подобранный диаметр вала:</strong>
                         @Result.ValueMm мм
                     </div>
 
                     <div class="col-md-6">
-                        <strong>Цепь:</strong>
-                        @Result.ValueKgMm
+                        <strong>Подобранный Калибр Цепи:</strong>
+                        @Result.ValueKgMm мм
                     </div>
 
                     <div class="col-md-6">

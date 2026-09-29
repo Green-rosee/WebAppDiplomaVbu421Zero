@@ -1,25 +1,23 @@
 using Microsoft.AspNetCore.Components;
 using WebAppEstimate.Areas.SiteBram.Data.Entity.WinchAnchors;
-using WebAppEstimate.Areas.SiteBram.Models;
 using WebAppEstimate.Areas.SiteBram.Services;
+
 //using WebAppEstimate.Areas.SiteBram.Entity;
 
 namespace WebAppEstimate.Areas.SiteBram.Components.Pages;
 
 public partial class WinchAnchorPage
 {
-    [Inject]
-    private IWinchAnchorHistoryService HistoryService { get; set; } = null!;
-
     private Guid? _savedCalculationId;
+
+    [Inject] private IWinchAnchorHistoryService HistoryService { get; set; } = null!;
     //------------
-    
+
     /*[Inject]
     private WinchAnchorExcelState ExcelState { get; set; } = null!;*/
 
-    [Inject]
-    private NavigationManager NavigationManager { get; set; } = null!;
-    
+    [Inject] private NavigationManager NavigationManager { get; set; } = null!;
+
     [Inject] private IWinchAnchorService WinchAnchorService { get; set; } = null!;
 
     protected List<WinchAnchorSeries> Series { get; set; } = new();
@@ -37,21 +35,28 @@ public partial class WinchAnchorPage
     protected string Message { get; set; } = string.Empty;
 
     //protected bool CanSave => Result != null;
-    
+
     protected decimal HourCost { get; set; }
+
+    /*protected decimal TotalCost =>
+        Result is null
+            ? 0
+            : (decimal)Result.Hour * HourCost;*/
+
+    protected bool CanSave =>
+        Result != null && HourCost > 0;
+
+    protected string WinchName { get; set; } = string.Empty;
+
+    protected bool CanShowExcel =>
+        _savedCalculationId != null;
+
+    protected int Quantity { get; set; } = 1;
 
     protected decimal TotalCost =>
         Result is null
             ? 0
-            : (decimal)Result.Hour * HourCost;
-    
-    protected bool CanSave =>
-        Result != null && HourCost > 0;
-    
-    protected string WinchName { get; set; } = string.Empty;
-    
-    protected bool CanShowExcel =>
-        _savedCalculationId != null;
+            : (decimal)Result.Hour * HourCost * Quantity;
 
     //--------------------------------------------------
     protected override async Task OnInitializedAsync()
@@ -107,6 +112,8 @@ public partial class WinchAnchorPage
             SelectedValueMm = Result.ValueMm,
             SelectedValueKgMm = Result.ValueKgMm,
 
+            Quantity = Quantity,
+
             Hour = Result.Hour,
             HourCost = HourCost,
             TotalCost = TotalCost
@@ -117,14 +124,13 @@ public partial class WinchAnchorPage
 
         Message = "Расчёт сохранён.";
     }
-    
-    protected  Task ShowExcel()
+
+    protected Task ShowExcel()
     {
         NavigationManager.NavigateTo(
-            "/SiteBram/WinchAnchor/Sheet");
+            "/SiteBram/WinchAnchor/Excel");
 
         return Task.CompletedTask;
-        
     }
 
 
@@ -134,14 +140,14 @@ public partial class WinchAnchorPage
 
         ValueKg = 0;
         ValueMm = 0;
-        ValueKgMm = 0;  
+        ValueKgMm = 0;
         HourCost = 0;
-        
+
         Result = null;
         Message = string.Empty;
         WinchName = string.Empty;
-        
+
         _savedCalculationId = null;
-       
+        Quantity = 1;
     }
 }

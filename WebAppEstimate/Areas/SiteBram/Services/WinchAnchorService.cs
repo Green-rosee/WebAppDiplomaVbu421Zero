@@ -34,7 +34,8 @@ public class WinchAnchorService : IWinchAnchorService
         if (designs.Count == 0)
             return null;
 
-        var closestKg = designs
+        //----корректировка разлчной логики подбора парраметров
+        /*var closestKg = designs
             .OrderBy(x => Math.Abs(x.ValueKg - valueKg))
             .First()
             .ValueKg;
@@ -54,6 +55,13 @@ public class WinchAnchorService : IWinchAnchorService
 
         return closestByKgAndMm
             .OrderBy(x => Math.Abs(x.ValueKgMm - valueKgMm))
+            .FirstOrDefault();*/
+
+        return designs
+            .OrderBy(x =>
+                Math.Abs((double)x.ValueKg - valueKg) / Math.Max(valueKg, 1) +
+                Math.Abs((double)x.ValueMm - valueMm) / Math.Max(valueMm, 1) +
+                Math.Abs((double)x.ValueKgMm - valueKgMm) / Math.Max(valueKgMm, 1))
             .FirstOrDefault();
     }
 }
