@@ -2,7 +2,7 @@ services:
 
   postgres:
     image: postgres:17-alpine
-    container_name: webapp-postgres
+    container_name: webapp-postgres-dev
 
     environment:
       POSTGRES_USER: webapp
@@ -11,7 +11,7 @@ services:
 
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./docker/postgres/init-dev.sql:/docker-entrypoint-initdb.d/init.sql
 
     ports:
       - "5432:5432"
@@ -43,21 +43,21 @@ services:
       ConnectionStrings__dbSiteBaseConnection: >
         Host=postgres;
         Port=5432;
-        Database=webapp_base;
+        Database=webapp_base_dev;
         Username=webapp;
         Password=webapp_password
 
       ConnectionStrings__dbSiteAdamConnection: >
         Host=postgres;
         Port=5432;
-        Database=webapp_adam;
+        Database=webapp_adam_dev;
         Username=webapp;
         Password=webapp_password
 
       ConnectionStrings__dbSiteBramConnection: >
         Host=postgres;
         Port=5432;
-        Database=webapp_bram;
+        Database=webapp_bram_dev;
         Username=webapp;
         Password=webapp_password
 

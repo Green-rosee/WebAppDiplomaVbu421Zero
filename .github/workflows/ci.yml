@@ -1,0 +1,84 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+
+  pull_request:
+    branches:
+      - master
+
+
+jobs:
+
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+
+      postgres:
+        image: postgres:17-alpine
+
+        env:
+          POSTGRES_USER: webapp
+          POSTGRES_PASSWORD: webapp_password
+          POSTGRES_DB: webapp_bram_test
+
+        ports:
+          - 5432:5432
+
+        options: >-
+          --health-cmd "pg_isready -U webapp -d webapp_bram_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+
+    env:
+      TEST_POSTGRES_CONNECTION: >-
+        Host=localhost;
+        Port=5432;
+        Database=webapp_bram_test;
+        Username=webapp;
+        Password=webapp_password
+
+
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+
+      - name: Restore
+        run: dotnet restore WebAppDiplomaVbu421a.sln
+
+
+      - name: Build
+        run: >
+          dotnet build
+          WebAppDiplomaVbu421a.sln
+          --configuration Release
+          --no-restore
+
+
+      - name: Run tests
+        run: >
+          dotnet test
+          WebAppEstimate.Tests/WebAppEstimate.Tests.csproj
+          --configuration Release
+          --no-build
+          --verbosity normal
+
+
+      - name: Build Docker image
+        run: >
+          docker build
+          -t webappestimate-ci
+          ./WebAppEstimate

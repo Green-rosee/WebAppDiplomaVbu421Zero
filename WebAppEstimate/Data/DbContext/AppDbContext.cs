@@ -17,8 +17,8 @@ public class AppDbContext : Microsoft.EntityFrameworkCore.DbContext
 
     public DbSet<UserAuthz> UserAuthorizations { get; set; }
 
-    //
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    //----времено закомечит для настройки хеширования паролей
+    /*protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
@@ -45,5 +45,5 @@ public class AppDbContext : Microsoft.EntityFrameworkCore.DbContext
                 Role = "Bram"
             }
         );
-    }
+    }*/
 }

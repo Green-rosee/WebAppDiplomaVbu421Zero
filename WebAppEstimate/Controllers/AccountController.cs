@@ -1,10 +1,9 @@
-using System.Security.Claims;
 using FluentValidation;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebAppEstimate.Data.DbContext;
+using WebAppEstimate.Data.Entity;
 using WebAppEstimate.Models.User;
 using WebAppEstimate.Services;
 
@@ -14,12 +13,12 @@ public class AccountController : Controller
 {
     //---Database
     private readonly AppDbContext _context;
+    private readonly IJwtTokenService _jwtTokenService;
     private readonly IValidator<UserLogin> _validator;
-    private  readonly IJwtTokenService _jwtTokenService;
 
     // Внедряем ваш Fluent-валидатор через DI-контейнер
     //
-    public AccountController(IValidator<UserLogin> validator, AppDbContext context,IJwtTokenService jwtTokenService)
+    public AccountController(IValidator<UserLogin> validator, AppDbContext context, IJwtTokenService jwtTokenService)
     {
         _validator = validator;
         _context = context;
@@ -57,32 +56,43 @@ public class AccountController : Controller
         //---
         // 2.  заменим на запрос к AppDbContext
         var user = await _context.UserAuthorizations
-            .SingleOrDefaultAsync(u => u.Login == userLogin.Login && u.Password == userLogin.Password);
+            .SingleOrDefaultAsync(u => u.Login == userLogin.Login);
 
         //--проверка
         if (user != null)
         {
-            var token = _jwtTokenService.CreateToken(user);
+            var hasher = new PasswordHasher<UserAuthz>();
 
-            Response.Cookies.Append(
-                "access_token",
-                token,
-                new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.Strict,
-                    Expires = DateTimeOffset.UtcNow.AddMinutes(2)
-                });
+            var passwordResult =
+                hasher.VerifyHashedPassword(
+                    user,
+                    user.Password,
+                    userLogin.Password);
 
-            return RedirectToAction(
-                "Start",
-                "Start",
-                new { area = "" });
-            
+            if (passwordResult == PasswordVerificationResult.Success ||
+                passwordResult == PasswordVerificationResult.SuccessRehashNeeded)
+            {
+                var token = _jwtTokenService.CreateToken(user);
+
+                Response.Cookies.Append(
+                    "access_token",
+                    token,
+                    new CookieOptions
+                    {
+                        HttpOnly = true,
+                        Secure = true,
+                        SameSite = SameSiteMode.Strict,
+                        Expires = DateTimeOffset.UtcNow.AddMinutes(2)
+                    });
+
+                return RedirectToAction(
+                    "Start",
+                    "Start",
+                    new { area = "" });
+            }
         }
 
-        // Если логин/пароль не подошли к базе данных
+        //------- Если логин/пароль не подошли к базе данных
         ModelState.AddModelError(string.Empty, "Неверный логин или пароль.");
         return View(userLogin);
     }
@@ -100,9 +110,6 @@ public class AccountController : Controller
     }
 }
 
-
-
-
 /*public class AccountController : Controller
 {
     //---Database
@@ -117,7 +124,7 @@ public class AccountController : Controller
         _context = context;
     }
 
-    //--- GET: 
+    //--- GET:
     [HttpGet]
     public IActionResult Account()
     {
@@ -127,7 +134,7 @@ public class AccountController : Controller
         return View();
     }
 
-    //--- POST: 
+    //--- POST:
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Account(UserLogin userLogin)
