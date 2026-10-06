@@ -1,62 +1,32 @@
-using BlazorDatasheet.Extensions;
 using FluentValidation;
-using Syncfusion.Blazor;
-using WebAppEstimate.Areas.SiteAdam.Models;
 using WebAppEstimate.Areas.SiteAdam.Pipeline;
-using WebAppEstimate.Areas.SiteAdam.Services;
-using WebAppEstimate.Areas.SiteAdam.Services.ExcelPumps;
-using WebAppEstimate.Areas.SiteBram.Models;
 using WebAppEstimate.Areas.SiteBram.Pipeline;
-using WebAppEstimate.Areas.SiteBram.Services;
+using WebAppEstimate.Areas.SiteCerber.Services;
 using WebAppEstimate.Components;
 using WebAppEstimate.Pipeline;
-using WebAppEstimate.Services;
+using WebAppEstimate.Pipeline.PipelineBuilder;
 
 //-------------------------start
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddApplicationDatabases(builder.Configuration);
-//Регистрируем аутентификацию через JWT-Token
-builder.Services.AddServiceAddJwtAuthentication();
 
+builder.Services.AddApplicationAuthentication();
+builder.Services.AddApplicationServices();
+builder.Services.AddApplicationBlazor();
 
-// Add services to the container.
-//
-builder.Services.AddControllersWithViews();
-
-//Добавляем FluentValidation в DI контейнер
-//---
-builder.Services.AddScoped<ICentrifugalPumpService, CentrifugalPumpService>();
+//--------------
+builder.Services.AddApplicationServices()
+    .AddScoped<IOpenScadService,
+        OpenScadService>();
+builder.Services.AddHttpClient
+<IGigaChatService,
+    GigaChatService>();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
-//
-builder.Services.AddValidatorsFromAssemblyContaining<CentrifugalPumpModelValid>();
-builder.Services.AddScoped<ICentrifugalPumpHistoryService,
-    CentrifugalPumpHistoryService>();
-//
-builder.Services.AddScoped<ICentrifugalPumpExcelService,
-    CentrifugalPumpExcelService>();
-builder.Services.AddScoped<IWinchExcelImportService, WinchAnchorExcelImportService>();
-//
-builder.Services.AddScoped<IWinchAnchorService, WinchAnchorService>();
-builder.Services.AddScoped<WinchAnchorExcelState>();
-builder.Services.AddScoped<
-    IWinchAnchorHistoryService, 
-        WinchAnchorHistoryService>();
-builder.Services.AddScoped<
-    IWinchAnchorExcelExportService,
-        WinchAnchorExcelExportService>();
-
-//----------Add Jwt Token-------------------
-builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
-//---
-
-//---Добавить Blazor-Components
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
-//----Регестрация библиотеки для Excel
-builder.Services.AddSyncfusionBlazor();
-builder.Services.AddBlazorDatasheet();
-
+builder.Services.AddScoped
+<IFlangeDrawingService,
+    FlangeDrawingService>();
+//-----------
 var app = builder.Build();
 
 //
@@ -83,24 +53,21 @@ app.MapAreaControllerRoute(
     "SiteBram/{controller=Home}/{action=Index}/{id?}"
 );
 
+//новая область создана SiteCerber
+app.MapAreaControllerRoute(
+    "siteCerberArea",
+    "SiteCerber",
+    "SiteCerber/{controller=Home}/{action=Index}/{id?}"
+);
+
 app.MapControllerRoute(
         "default",
         "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
+
 //-----------
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
-/*app.MapRazorComponents<AppBram>()
-    .AddInteractiveServerRenderMode();*/
-
-
-// 3. УНИВЕРСАЛЬНЫЙ МАРШРУТ ДЛЯ ВСЕХ ОБЛАСТЕЙ (ТЕКУЩИХ И БУДУЩИХ)
-/*
-app.MapControllerRoute(
-    name: "allAreas",
-    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}"
-);
-*/
 
 //-----
 app.Run();

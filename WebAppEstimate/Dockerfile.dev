@@ -1,5 +1,15 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0
 
+RUN apt-get update \
+    && apt-get install -y openscad xvfb ca-certificates curl openssl \
+    && mkdir -p /usr/local/share/ca-certificates/russian-trusted \
+    && curl -k https://gu-st.ru/content/lending/russian_trusted_root_ca_pem.crt \
+       -o /usr/local/share/ca-certificates/russian-trusted/russian_trusted_root_ca_pem.crt \
+    && curl -k https://gu-st.ru/content/lending/russian_trusted_sub_ca_pem.crt \
+       -o /usr/local/share/ca-certificates/russian-trusted/russian_trusted_sub_ca_pem.crt \
+    && update-ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+    
 WORKDIR /app
 
 COPY WebAppEstimate.csproj ./

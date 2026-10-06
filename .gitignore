@@ -26,3 +26,13 @@ publish-test/
 # Windows
 desktop.ini
 Thumbs.db
+
+# Secrets
+.env
+**/.env
+apiKeyGigaChat.txt
+
+# SiteCerber generated files
+WebAppEstimate/Areas/SiteCerber/OpenScad/Generated/
+WebAppEstimate/Areas/SiteCerber/OpenScad/Test/*.stl
+WebAppEstimate/wwwroot/generated/

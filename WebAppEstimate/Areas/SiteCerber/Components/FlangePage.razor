@@ -1,0 +1,600 @@
+@page "/SiteCerber/Flange"
+@rendermode InteractiveServer
+
+
+<div class="flange-page">
+
+    <div class="container py-4">
+
+        <div class="flange-header text-center mb-4">
+            <div class="small-badge">МОДУЛЬ: ФЛАНЕЦ</div>
+
+            <h1 class="page-title mt-3">Создание фланца</h1>
+
+            <p class="page-subtitle">
+                Параметрическое создание 3D-модели и технического чертежа
+                для судоремонтных и производственных задач
+            </p>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(Message))
+        {
+            <div class="alert custom-alert mb-4">
+                @Message
+            </div>
+        }
+
+        <!-- Компактная форма -->
+        <div class="card industrial-card compact-form-card mb-4">
+            <div class="card-body">
+                <h3 class="section-title mb-4">Параметры детали</h3>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label custom-label">Наружный диаметр</label>
+                        <InputNumber class="form-control custom-input"
+                                     @bind-Value="Model.OuterDiameter" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label custom-label">Внутренний диаметр</label>
+                        <InputNumber class="form-control custom-input"
+                                     @bind-Value="Model.InnerDiameter" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label custom-label">Толщина</label>
+                        <InputNumber class="form-control custom-input"
+                                     @bind-Value="Model.Thickness" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label custom-label">Количество отверстий</label>
+                        <InputNumber class="form-control custom-input"
+                                     @bind-Value="Model.HoleCount" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label custom-label">Диаметр отверстия</label>
+                        <InputNumber class="form-control custom-input"
+                                     @bind-Value="Model.HoleDiameter" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label custom-label">Диаметр болтовой окружности</label>
+                        <InputNumber class="form-control custom-input"
+                                     @bind-Value="Model.BoltCircleDiameter" />
+                    </div>
+                </div>
+
+                <div class="mt-4 d-flex flex-wrap gap-2">
+                    <button class="btn btn-industrial-primary"
+                            @onclick="GenerateAsync">
+                        Создать модель
+                    </button>
+
+                    @if (!string.IsNullOrWhiteSpace(ResultPath))
+                    {
+                        <a href="@ResultPath"
+                           class="btn btn-industrial-success"
+                           download>
+                            Скачать STL
+                        </a>
+                    }
+
+                    @if (!string.IsNullOrWhiteSpace(DrawingUrl))
+                    {
+                        <a href="@DrawingUrl"
+                           class="btn btn-industrial-outline"
+                           download>
+                            Скачать SVG
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Модель и чертеж -->
+        @if (!string.IsNullOrWhiteSpace(PreviewUrl) || !string.IsNullOrWhiteSpace(DrawingUrl))
+        {
+            <div class="row g-4 mb-4">
+                <div class="col-lg-6">
+                    <div class="card industrial-card h-100">
+                        <div class="card-body">
+                            <h3 class="section-title mb-3">3D-модель</h3>
+
+                            @if (!string.IsNullOrWhiteSpace(PreviewUrl))
+                            {
+                                <div class="preview-box">
+                                    <img src="@PreviewUrl"
+                                         class="img-fluid preview-image"
+                                         alt="Предпросмотр фланца" />
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="empty-box">
+                                    Предпросмотр модели пока отсутствует
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="card industrial-card h-100">
+                        <div class="card-body">
+                            <h3 class="section-title mb-3">Чертёж</h3>
+
+                            @if (!string.IsNullOrWhiteSpace(DrawingUrl))
+                            {
+                                <div class="preview-box">
+                                    <img src="@DrawingUrl"
+                                         class="img-fluid preview-image drawing-image"
+                                         alt="Чертёж фланца" />
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="empty-box">
+                                    Чертёж пока отсутствует
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- GigaChat -->
+        <div class="card industrial-card mb-4">
+            <div class="card-body">
+                <h3 class="section-title mb-2">Заполнение параметров с помощью ИИ</h3>
+
+                <p class="ai-subtitle">
+                    Опишите фланец обычным текстом, и GigaChat заполнит форму автоматически.
+                </p>
+
+                <textarea class="form-control custom-textarea"
+                          rows="5"
+                          @bind="AiPrompt"
+                          placeholder="Например: наружный диаметр 320 мм, внутренний 200 мм, толщина 50 мм, 12 отверстий Ø20, болтовая окружность Ø250">
+                </textarea>
+
+                <div class="mt-3">
+                    <button class="btn btn-industrial-secondary"
+                            @onclick="FillFromAiAsync">
+                        Заполнить форму с помощью ИИ
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    .flange-page {
+        min-height: 100vh;
+        background:
+            radial-gradient(circle at top, rgba(20, 67, 97, 0.35), transparent 45%),
+            linear-gradient(180deg, #071a2b 0%, #0a2436 45%, #081b2c 100%);
+        color: #d9e6ef;
+        padding-bottom: 40px;
+    }
+
+    .flange-header {
+        padding-top: 10px;
+    }
+
+    .small-badge {
+        display: inline-block;
+        padding: 6px 14px;
+        border-radius: 999px;
+        background: rgba(255, 166, 0, 0.12);
+        border: 1px solid rgba(255, 166, 0, 0.35);
+        color: #ffbf47;
+        font-size: 12px;
+        letter-spacing: 1px;
+        font-weight: 700;
+    }
+
+    .page-title {
+        color: #f2f6fa;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .page-subtitle {
+        color: #9cb4c4;
+        max-width: 760px;
+        margin: 0 auto;
+    }
+
+    .industrial-card {
+        background: linear-gradient(180deg, rgba(18, 45, 66, 0.96), rgba(14, 36, 53, 0.98));
+        border: 1px solid rgba(255, 166, 0, 0.18);
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+        color: #d9e6ef;
+    }
+
+    .compact-form-card {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .section-title {
+        color: #f4f7fb;
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-bottom: 0;
+    }
+
+    .custom-label {
+        color: #b9c9d4;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .custom-input,
+    .custom-textarea {
+        background: rgba(7, 21, 32, 0.65);
+        border: 1px solid rgba(140, 170, 190, 0.20);
+        color: #f2f6fa;
+        border-radius: 10px;
+    }
+
+    .custom-input:focus,
+    .custom-textarea:focus {
+        background: rgba(7, 21, 32, 0.78);
+        color: #ffffff;
+        border-color: rgba(255, 166, 0, 0.55);
+        box-shadow: 0 0 0 0.2rem rgba(255, 166, 0, 0.12);
+    }
+
+    .custom-input::placeholder,
+    .custom-textarea::placeholder {
+        color: #89a0b0;
+    }
+
+    .btn-industrial-primary {
+        background: linear-gradient(180deg, #ffae2b 0%, #e18a00 100%);
+        color: #101820;
+        border: none;
+        border-radius: 10px;
+        padding: 10px 18px;
+        font-weight: 700;
+    }
+
+    .btn-industrial-primary:hover {
+        background: linear-gradient(180deg, #ffbb4d 0%, #f29b12 100%);
+        color: #0f1720;
+    }
+
+    .btn-industrial-success {
+        background: linear-gradient(180deg, #1c9d7a 0%, #16785e 100%);
+        color: #f4fbf8;
+        border: none;
+        border-radius: 10px;
+        padding: 10px 18px;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .btn-industrial-success:hover {
+        color: white;
+        background: linear-gradient(180deg, #21b089 0%, #18906f 100%);
+    }
+
+    .btn-industrial-secondary {
+        background: rgba(255,255,255,0.08);
+        color: #dce8ef;
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 10px;
+        padding: 10px 18px;
+        font-weight: 600;
+    }
+
+    .btn-industrial-secondary:hover {
+        background: rgba(255,255,255,0.14);
+        color: #ffffff;
+    }
+
+    .btn-industrial-outline {
+        background: transparent;
+        color: #ffbf47;
+        border: 1px solid rgba(255, 191, 71, 0.45);
+        border-radius: 10px;
+        padding: 10px 18px;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .btn-industrial-outline:hover {
+        background: rgba(255, 191, 71, 0.08);
+        color: #ffd27a;
+    }
+
+    .preview-box {
+        background: rgba(5, 16, 26, 0.45);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 12px;
+        padding: 14px;
+        min-height: 420px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .preview-image {
+        max-height: 560px;
+        width: auto;
+        border-radius: 8px;
+    }
+
+    .drawing-image {
+        background: white;
+        padding: 6px;
+    }
+
+    .empty-box {
+        min-height: 420px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px dashed rgba(255,255,255,0.15);
+        border-radius: 12px;
+        color: #8fa8b8;
+        background: rgba(5, 16, 26, 0.35);
+    }
+
+    .ai-subtitle {
+        color: #9cb4c4;
+        margin-bottom: 14px;
+    }
+
+    .custom-alert {
+        background: rgba(24, 117, 163, 0.18);
+        border: 1px solid rgba(90, 180, 220, 0.22);
+        color: #d7eef9;
+        border-radius: 12px;
+    }
+</style>
+
+
+
+@*<div class="container py-4">
+
+    <!-- ========================= -->
+    <!-- ФОРМА ПАРАМЕТРОВ -->
+    <!-- ========================= -->
+
+    <div class="card shadow-sm mx-auto mb-4"
+         style="max-width: 760px;">
+
+        <div class="card-body">
+
+            <h3 class="mb-4">
+                Создание фланца
+            </h3>
+
+            <div class="row g-3">
+
+                <div class="col-md-6">
+                    <label class="form-label">
+                        Наружный диаметр
+                    </label>
+
+                    <InputNumber class="form-control"
+                                 @bind-Value="Model.OuterDiameter" />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">
+                        Внутренний диаметр
+                    </label>
+
+                    <InputNumber class="form-control"
+                                 @bind-Value="Model.InnerDiameter" />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">
+                        Толщина
+                    </label>
+
+                    <InputNumber class="form-control"
+                                 @bind-Value="Model.Thickness" />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">
+                        Количество отверстий
+                    </label>
+
+                    <InputNumber class="form-control"
+                                 @bind-Value="Model.HoleCount" />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">
+                        Диаметр отверстия
+                    </label>
+
+                    <InputNumber class="form-control"
+                                 @bind-Value="Model.HoleDiameter" />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">
+                        Диаметр болтовой окружности
+                    </label>
+
+                    <InputNumber class="form-control"
+                                 @bind-Value="Model.BoltCircleDiameter" />
+                </div>
+
+            </div>
+
+            <div class="d-flex gap-2 mt-4">
+
+                <button class="btn btn-primary"
+                        @onclick="GenerateAsync">
+                    Создать модель
+                </button>
+
+                @if (!string.IsNullOrWhiteSpace(ResultPath))
+                {
+                    <a href="@ResultPath"
+                       class="btn btn-success"
+                       download>
+                        Скачать STL
+                    </a>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(DrawingUrl))
+                {
+                    <a href="@DrawingUrl"
+                       class="btn btn-outline-primary"
+                       download>
+                        Скачать SVG
+                    </a>
+                }
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================= -->
+    <!-- 3D + ЧЕРТЁЖ -->
+    <!-- ========================= -->
+
+    @if (!string.IsNullOrWhiteSpace(PreviewUrl) ||
+         !string.IsNullOrWhiteSpace(DrawingUrl))
+    {
+        <div class="row g-4 mb-4">
+
+            <!-- 3D -->
+            <div class="col-lg-6">
+
+                <div class="card shadow-sm h-100">
+
+                    <div class="card-body">
+
+                        <h4 class="mb-3">
+                            3D-модель
+                        </h4>
+
+                        @if (!string.IsNullOrWhiteSpace(PreviewUrl))
+                        {
+                            <img src="@PreviewUrl"
+                                 class="img-fluid border rounded"
+                                 alt="Предпросмотр 3D-модели" />
+                        }
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ЧЕРТЁЖ -->
+            <div class="col-lg-6">
+
+                <div class="card shadow-sm h-100">
+
+                    <div class="card-body">
+
+                        <h4 class="mb-3">
+                            Чертёж
+                        </h4>
+
+                        @if (!string.IsNullOrWhiteSpace(DrawingUrl))
+                        {
+                            <img src="@DrawingUrl"
+                                 class="img-fluid border rounded"
+                                 alt="Чертёж фланца" />
+                        }
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    }
+
+
+    <!-- ========================= -->
+    <!-- GIGACHAT -->
+    <!-- ========================= -->
+
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-body">
+
+            <h4 class="mb-3">
+                Заполнение параметров с помощью ИИ
+            </h4>
+
+            <p class="text-muted">
+                Опишите фланец обычным текстом,
+                и GigaChat заполнит параметры формы.
+            </p>
+
+            <textarea class="form-control"
+                      rows="4"
+                      @bind="AiPrompt"
+                      placeholder="Например: наружный диаметр 320 мм, внутренний 200 мм, толщина 50 мм, 12 отверстий Ø20, болтовая окружность Ø250">
+            </textarea>
+
+            <button class="btn btn-secondary mt-3"
+                    @onclick="FillFromAiAsync">
+                Заполнить форму с помощью ИИ
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================= -->
+    <!-- СООБЩЕНИЯ -->
+    <!-- ========================= -->
+
+    @if (!string.IsNullOrWhiteSpace(Message))
+    {
+        <div class="alert alert-info">
+            @Message
+        </div>
+    }
+
+</div>*@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

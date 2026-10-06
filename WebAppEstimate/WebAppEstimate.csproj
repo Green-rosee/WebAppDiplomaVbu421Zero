@@ -31,12 +31,17 @@
         <Folder Include="Areas\SiteAdam\Views\Home\"/>
         <Folder Include="Areas\SiteBram\Controllers\"/>
         <Folder Include="Areas\SiteBram\ExcelFileLoad\WinchAnchorExcel\"/>
+        <Folder Include="Areas\SiteCerber\Controllers\"/>
+        <Folder Include="Areas\SiteCerber\Data\"/>
+        <Folder Include="Areas\SiteCerber\Templates\"/>
+        <Folder Include="Areas\SiteCerber\Views\Home\"/>
         <Folder Include="ExcelFilesPageSave\CentrPumps\"/>
         <Folder Include="ExcelFilesPageSave\ContractsCentrPumps\"/>
         <Folder Include="ExcelFilesPageSave\WinchAnchor\"/>
         <Folder Include="Views\Account\"/>
         <Folder Include="Views\Error\"/>
         <Folder Include="Views\Login\"/>
+        <Folder Include="wwwroot\generated\sitecerber\"/>
     </ItemGroup>
 
     <ItemGroup>

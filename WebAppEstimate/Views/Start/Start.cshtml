@@ -1,5 +1,7 @@
 <!-- [[
 
+
+
 &copy; 2026 - WebAppEstimate - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
 	</div>
 </footer>
@@ -8,11 +10,19 @@
 	
 	
 
+	
+
+
+
 	@* Если для страницы Start.cshtml нужны уникальные скрипты, пишите их здесь *@
 }
 
 </body>				
 </html>
+
+
+
+
 
 
 
@@ -105,21 +115,21 @@ else
 		</a>
 
 		<!-- Блок 3: Контакты и Заявки -->
-		<a asp-controller="" asp-action="" class="shipyard-card">
+		<a asp-area="SiteCerber" asp-controller="Home" asp-action="Index" class="shipyard-card">
 			<div class="card-border-effect"></div>
 			<div class="card-content">
 				<div class="card-icon">📋</div>
 				<h3>Оставить заявку</h3>
-				<p>Связь со сметным отделом, отправка чертежей и вызов дефектовщика на объект.</p>
+				<p>Создание 3Д моделей и чертежей по заявкам.</p>
 				<p>Раздел в разработке ...............</p>
 				<span class="card-link-text">Связаться с нами &rarr;</span>
 			</div>
 		</a>
 	</div>
-	
-	
+
+
 	<!-- БЛОК АВТОРИЗАЦИИ: Вход / Выход -->
-	@if (User.Identity != null && User.Identity.IsAuthenticated)
+	@*@if (User.Identity != null && User.Identity.IsAuthenticated)
 	{
 		<!-- Этот блок виден ТОЛЬКО авторизованным пользователям -->
 		<a asp-area="" asp-controller="Account" asp-action="AccountLoginOut" class="shipyard-card auth-card-logout">
@@ -144,7 +154,9 @@ else
 				<span class="card-link-text">Войти в профиль &rarr;</span>
 			</div>
 		</a>
-	}
+	}*@
+	
+	
 </div>
 
 

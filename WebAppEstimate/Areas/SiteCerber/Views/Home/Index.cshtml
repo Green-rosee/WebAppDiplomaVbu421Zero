@@ -1,0 +1,509 @@
+
+@{
+    ViewData["Title"] = "Конструктор деталей";
+}
+
+<style>
+    .cerber-page {
+        padding: 32px 0 44px;
+        background:
+            linear-gradient(135deg, #0b1d2a 0%, #102c3e 55%, #0b1d2a 100%);
+        color: #e9f0f4;
+    }
+
+    .cerber-container {
+        max-width: 1240px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+
+    .cerber-header {
+        max-width: 850px;
+        margin: 0 auto 24px;
+        text-align: center;
+    }
+
+    .cerber-header h1 {
+        margin: 0;
+        font-size: 2.1rem;
+        font-weight: 700;
+        color: #ffffff;
+    }
+
+    .cerber-header p {
+        margin: 10px 0 0;
+        color: #a9bdc9;
+        font-size: 1rem;
+        line-height: 1.5;
+    }
+
+    .cerber-status {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 14px;
+    }
+
+    .cerber-status span {
+        padding: 5px 11px;
+        border-radius: 999px;
+        background: rgba(255,255,255,.06);
+        border: 1px solid rgba(255,255,255,.08);
+        color: #c9d8e1;
+        font-size: .8rem;
+    }
+
+    .cerber-section-title {
+        margin: 0 0 14px;
+        color: #93aabd;
+        font-size: .92rem;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+    }
+
+    .cerber-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 20px;
+        align-items: stretch;
+    }
+
+    .cerber-card {
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        min-height: 100%;
+        border-radius: 15px;
+        background:
+            linear-gradient(
+                180deg,
+                rgba(25, 52, 70, .98),
+                rgba(15, 34, 48, .98)
+            );
+        border: 1px solid rgba(125,155,175,.25);
+        box-shadow: 0 10px 24px rgba(0,0,0,.24);
+        transition:
+            transform .2s ease,
+            box-shadow .2s ease;
+    }
+
+    .cerber-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 14px 30px rgba(0,0,0,.3);
+    }
+
+    .cerber-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background:
+            linear-gradient(
+                90deg,
+                #ff8a00,
+                #ffc75f
+            );
+    }
+
+    .cerber-card.disabled {
+        opacity: .58;
+    }
+
+    .cerber-card-body {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        padding: 20px;
+    }
+
+    .cerber-icon {
+        width: 46px;
+        height: 46px;
+        margin-bottom: 14px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.35rem;
+        background: rgba(255,138,0,.12);
+        border: 1px solid rgba(255,138,0,.25);
+    }
+
+    .cerber-card h3 {
+        margin: 0 0 8px;
+        color: #ffffff;
+        font-size: 1.3rem;
+        font-weight: 700;
+    }
+
+    .cerber-description {
+        margin-bottom: 12px;
+        color: #b9c9d3;
+        line-height: 1.5;
+        font-size: .94rem;
+    }
+
+    .cerber-list {
+        margin: 0 0 18px;
+        padding-left: 18px;
+        color: #dce6ec;
+        font-size: .9rem;
+    }
+
+    .cerber-list li {
+        margin-bottom: 5px;
+    }
+
+    .cerber-badge {
+        display: inline-block;
+        align-self: flex-start;
+        margin-bottom: 12px;
+        padding: 4px 9px;
+        border-radius: 999px;
+        font-size: .75rem;
+        font-weight: 600;
+    }
+
+    .cerber-badge.ready {
+        color: #86f3c9;
+        background: rgba(0,200,140,.12);
+        border: 1px solid rgba(0,200,140,.22);
+    }
+
+    .cerber-badge.dev {
+        color: #ffe08a;
+        background: rgba(255,190,0,.10);
+        border: 1px solid rgba(255,190,0,.20);
+    }
+
+    .cerber-footer {
+        margin-top: auto;
+    }
+
+    .cerber-btn-main {
+        display: block;
+        width: 100%;
+        padding: 10px 14px;
+        border-radius: 9px;
+        text-align: center;
+        text-decoration: none;
+        font-weight: 600;
+        color: #121920;
+        background:
+            linear-gradient(
+                180deg,
+                #ff9b22,
+                #e77e00
+            );
+        border: 1px solid rgba(255,180,90,.3);
+        transition: filter .2s ease;
+    }
+
+    .cerber-btn-main:hover {
+        color: #121920;
+        filter: brightness(1.08);
+    }
+
+    .cerber-btn-disabled {
+        width: 100%;
+        padding: 10px 14px;
+        border-radius: 9px;
+        border: 1px solid rgba(255,255,255,.08);
+        background: rgba(255,255,255,.05);
+        color: #aab8c0;
+    }
+
+    @@media (max-width: 992px) {
+        .cerber-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .cerber-header h1 {
+            font-size: 1.7rem;
+        }
+    }
+</style>
+
+<div class="cerber-page">
+    <div class="cerber-container">
+
+        <div class="cerber-header">
+
+            <h1>
+                Конструктор судоремонтных деталей
+            </h1>
+
+            <p>
+                Параметрическое создание 3D-моделей
+                и технических чертежей для ремонтных
+                и производственных задач.
+            </p>
+
+            <div class="cerber-status">
+                <span>OpenSCAD</span>
+                <span>3D-модели</span>
+                <span>SVG-чертежи</span>
+                <span>GigaChat</span>
+            </div>
+
+        </div>
+
+
+        <div class="cerber-section-title">
+            Производственные модули
+        </div>
+
+
+        <div class="cerber-grid">
+
+            <!-- Фланец -->
+            <div class="cerber-card">
+
+                <div class="cerber-card-body">
+
+                    <div class="cerber-icon">
+                        ⚙️
+                    </div>
+
+                    <span class="cerber-badge ready">
+                        Модуль готов
+                    </span>
+
+                    <h3>
+                        Фланец
+                    </h3>
+
+                    <p class="cerber-description">
+                        Создание параметрического фланца,
+                        3D-модели и технического чертежа.
+                    </p>
+
+                    <ul class="cerber-list">
+                        <li>наружный диаметр;</li>
+                        <li>внутренний диаметр;</li>
+                        <li>толщина;</li>
+                        <li>количество отверстий;</li>
+                        <li>диаметр отверстий;</li>
+                        <li>болтовая окружность.</li>
+                    </ul>
+
+                    <div class="cerber-footer">
+
+                        <a href="/SiteCerber/Flange"
+                           class="cerber-btn-main">
+                            Открыть модуль
+                        </a>
+
+                    </div>
+
+                </div>
+            </div>
+
+
+            <!-- Вал -->
+            <div class="cerber-card disabled">
+
+                <div class="cerber-card-body">
+
+                    <div class="cerber-icon">
+                        🛠️
+                    </div>
+
+                    <span class="cerber-badge dev">
+                        В разработке
+                    </span>
+
+                    <h3>
+                        Вал
+                    </h3>
+
+                    <p class="cerber-description">
+                        Параметрическое создание валов
+                        для судоремонтных и производственных задач.
+                    </p>
+
+                    <ul class="cerber-list">
+                        <li>общая длина;</li>
+                        <li>диаметры участков;</li>
+                        <li>ступени;</li>
+                        <li>посадочные зоны;</li>
+                        <li>резьба и канавки.</li>
+                    </ul>
+
+                    <div class="cerber-footer">
+
+                        <button class="cerber-btn-disabled"
+                                disabled>
+                            В разработке
+                        </button>
+
+                    </div>
+
+                </div>
+            </div>
+
+
+            <!-- Втулка -->
+            <div class="cerber-card disabled">
+
+                <div class="cerber-card-body">
+
+                    <div class="cerber-icon">
+                        🔩
+                    </div>
+
+                    <span class="cerber-badge dev">
+                        В разработке
+                    </span>
+
+                    <h3>
+                        Втулка
+                    </h3>
+
+                    <p class="cerber-description">
+                        Создание втулок по заданным размерам
+                        для восстановления сопрягаемых узлов.
+                    </p>
+
+                    <ul class="cerber-list">
+                        <li>наружный диаметр;</li>
+                        <li>внутренний диаметр;</li>
+                        <li>длина;</li>
+                        <li>фаски;</li>
+                        <li>посадочные размеры.</li>
+                    </ul>
+
+                    <div class="cerber-footer">
+
+                        <button class="cerber-btn-disabled"
+                                disabled>
+                            В разработке
+                        </button>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+@*<div class="container py-5">
+
+    <div class="text-center mb-5">
+        <h1 class="display-5 fw-bold">
+            Конструктор судоремонтных деталей
+        </h1>
+
+        <p class="lead text-muted">
+            Выберите тип детали для создания параметрической 3D-модели
+        </p>
+    </div>
+
+    <div class="row g-4">
+
+        <!-- Фланец -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm border-0">
+
+                <div class="card-body d-flex flex-column">
+
+                    <h3 class="card-title">
+                        Фланец
+                    </h3>
+
+                    <p class="card-text text-muted">
+                        Создание параметрического фланца
+                        по заданным геометрическим размерам.
+                    </p>
+
+                    <ul class="small text-muted">
+                        <li>наружный диаметр;</li>
+                        <li>внутренний диаметр;</li>
+                        <li>толщина;</li>
+                        <li>количество отверстий;</li>
+                        <li>диаметр отверстий;</li>
+                        <li>диаметр окружности болтов.</li>
+                    </ul>
+
+                    <div class="mt-auto">
+                        <a href="/SiteCerber/Flange"
+                           class="btn btn-primary w-100">
+                            Создать фланец
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Вал -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm border-0 opacity-50">
+
+                <div class="card-body d-flex flex-column">
+
+                    <h3 class="card-title">
+                        Вал
+                    </h3>
+
+                    <p class="card-text text-muted">
+                        Параметрическое создание валов.
+                    </p>
+
+                    <div class="mt-auto">
+                        <button class="btn btn-secondary w-100"
+                                disabled>
+                            В разработке
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Втулка -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm border-0 opacity-50">
+
+                <div class="card-body d-flex flex-column">
+
+                    <h3 class="card-title">
+                        Втулка
+                    </h3>
+
+                    <p class="card-text text-muted">
+                        Создание втулок по заданным размерам.
+                    </p>
+
+                    <div class="mt-auto">
+                        <button class="btn btn-secondary w-100"
+                                disabled>
+                            В разработке
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>*@
+

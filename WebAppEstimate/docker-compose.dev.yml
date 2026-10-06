@@ -37,6 +37,7 @@ services:
       ASPNETCORE_URLS: http://+:8080
       ASPNETCORE_ENVIRONMENT: Development
       DOTNET_USE_POLLING_FILE_WATCHER: "1"
+      GigaChat__AuthorizationKey: "${GIGACHAT_AUTH_KEY}"
 
       DatabaseProvider: Postgres
 
