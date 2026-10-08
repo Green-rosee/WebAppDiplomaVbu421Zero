@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace WebAppEstimate.Areas.SiteCerber.Controllers;
 
 [Area("SiteCerber")]
-[Authorize(Roles = "Admin")]
+[Authorize(Roles = "Admin,Cerber")]
 public class HomeController : Controller
 {
     // GET: HomeController

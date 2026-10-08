@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using BlazorDatasheet.Core.Data;
 using BlazorDatasheet.Core.Formats;
+using Microsoft.JSInterop;
 using WebAppEstimate.Areas.SiteBram.Models;
 using WebAppEstimate.Areas.SiteBram.Services;
 
@@ -8,6 +9,9 @@ namespace WebAppEstimate.Areas.SiteBram.Components.Pages;
 
 public partial class WinchAnchorExcelPage
 {
+    [Inject]
+    private IJSRuntime JsRuntime { get; set; } = null!;
+    
     [Inject]
     private IWinchAnchorExcelExportService ExcelExportService
     { get; set; } = null!;
@@ -168,5 +172,46 @@ public partial class WinchAnchorExcelPage
 
         Message =
             $"Excel-файл сохранён: {Path.GetFileName(path)}";
+    }
+    
+    //--------сохранить в директорию на ПК
+    protected async Task DownloadExcelAsync()
+    {
+        var rows = new List<List<object?>>();
+
+        for (var row = 0; row <= _calculationCount; row++)
+        {
+            var values = new List<object?>();
+
+            for (var col = 0; col < 9; col++)
+            {
+                var cell = Sheet.Cells[row, col];
+
+                values.Add(
+                    cell.Value?.ToString());
+            }
+
+            rows.Add(values);
+        }
+
+        var path =
+            await ExcelExportService.SaveContractAsync(rows);
+
+        var fileName =
+            Path.GetFileName(path);
+
+        var fileBytes =
+            await File.ReadAllBytesAsync(path);
+
+        var base64 =
+            Convert.ToBase64String(fileBytes);
+
+        await JsRuntime.InvokeVoidAsync(
+            "downloadFileFromBase64",
+            fileName,
+            base64);
+
+        Message =
+            $"Excel-файл подготовлен к скачиванию: {fileName}";
     }
 }

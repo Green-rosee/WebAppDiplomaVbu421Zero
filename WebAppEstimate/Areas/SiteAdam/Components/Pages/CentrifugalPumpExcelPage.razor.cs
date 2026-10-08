@@ -4,11 +4,15 @@ using Syncfusion.Blazor.Spreadsheet;
 using WebAppEstimate.Areas.SiteAdam.Services;
 
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.JSInterop;
 
 namespace WebAppEstimate.Areas.SiteAdam.Components.Pages;
 
 public partial class CentrifugalPumpExcelPage
 {
+    [Inject]
+    private IJSRuntime JsRuntime { get; set; } = null!;
+    
     [Inject]
     private ICentrifugalPumpHistoryService HistoryService { get; set; } = null!;
     
@@ -223,6 +227,74 @@ public partial class CentrifugalPumpExcelPage
        var filePath = Path.Combine(folderPath, fileName);
 
        workbook.SaveAs(filePath);
+   }
+   
+   //-------сохранить в диреткорию на ПК
+   protected async Task DownloadContractAsync()
+   {
+       var histories =
+           await HistoryService.GetAllAsync();
+
+       using var workbook =
+           new XLWorkbook();
+
+       var sheet =
+           workbook.Worksheets.Add("Контракт");
+
+       sheet.Cell("A1").Value = "КОНТРАКТ";
+
+       sheet.Cell("A3").Value = "Заказчик:";
+       sheet.Cell("B3").Value = "ООО Заказчик";
+
+       sheet.Cell("A4").Value = "Дата:";
+       sheet.Cell("B4").Value = DateTime.Now;
+
+       sheet.Cell("A6").Value = "Наименование";
+       sheet.Cell("B6").Value = "Количество";
+       sheet.Cell("C6").Value = "Стоимость часа";
+       sheet.Cell("D6").Value = "Общая стоимость";
+
+       var row = 7;
+
+       foreach (var item in histories)
+       {
+           sheet.Cell(row, 1).Value = item.Name;
+           sheet.Cell(row, 2).Value = item.Number;
+           sheet.Cell(row, 3).Value = item.CostHour;
+           sheet.Cell(row, 4).Value = item.TotalSumCostHour;
+
+           row++;
+       }
+
+       sheet.Cell(row + 1, 3).Value =
+           "ИТОГО:";
+
+       sheet.Cell(row + 1, 4).FormulaA1 =
+           $"SUM(D7:D{row - 1})";
+
+       sheet.Columns().AdjustToContents();
+
+       using var stream =
+           new MemoryStream();
+
+       workbook.SaveAs(stream);
+
+       var fileBytes =
+           stream.ToArray();
+
+       var base64 =
+           Convert.ToBase64String(fileBytes);
+
+       var fileName =
+           $"Contract_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.xlsx";
+
+       await JsRuntime.InvokeVoidAsync(
+           "downloadFileFromBase64",
+           fileName,
+           base64);
+
+       SaveMessage =
+           $"Контракт подготовлен к скачиванию: {fileName}";
    }
 }
 

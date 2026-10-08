@@ -8,34 +8,6 @@ public static class DatabaseInitAuthorize
 {
     public static IApplicationBuilder InitializeAuthorize(this IApplicationBuilder app)
     {
-        /*using (var scope = app.ApplicationServices.CreateScope())
-        {
-            var services = scope.ServiceProvider;
-
-            try
-            {
-                var context = services.GetRequiredService<AppDbContext>();
-                var configuration = services.GetRequiredService<IConfiguration>();
-
-                var resetDatabase = configuration.GetValue<bool>("ResetAuthorizeDatabase");
-
-                if (resetDatabase) context.Database.EnsureDeleted();
-
-                //---я закоментил так как проект в докере
-                //context.Database.EnsureDeleted();
-                //
-                //---
-                context.Database.EnsureCreated();
-            }
-            catch (Exception e)
-            {
-                var logger = services.GetRequiredService<ILogger<Program>>();
-                logger.LogError(e, "Ошибка при инициализации базы данных.");
-            }
-        }
-
-        return app;*/
-
         //------------
         using (var scope = app.ApplicationServices.CreateScope())
         {
@@ -54,49 +26,86 @@ public static class DatabaseInitAuthorize
 
             context.Database.EnsureCreated();
 
-            if (context.UserAuthorizations.Any())
-                return app;
+            /*if (context.UserAuthorizations.Any())
+                return app;*/
 
             var hasher =
                 new PasswordHasher<UserAuthz>();
 
-            var admin = new UserAuthz
+            //-------------
+            if (!context.UserAuthorizations.Any(x => x.Login == "admins"))
             {
-                Id = 1,
-                Login = "admins",
-                Role = "Admin"
-            };
+                var admin = new UserAuthz
+                {
+                    Id = 1,
+                    Login = "admins",
+                    Role = "Admin"
+                };
 
-            admin.Password =
-                hasher.HashPassword(admin, "admins");
+                admin.Password =
+                    hasher.HashPassword(admin, "admins");
+
+                context.UserAuthorizations.Add(admin);
+            }
+            //------------
 
 
-            var adam = new UserAuthz
+            //-------------
+            if (!context.UserAuthorizations.Any(x => x.Login == "userAdam"))
             {
-                Id = 2,
-                Login = "userAdam",
-                Role = "Adam"
-            };
+                var adam = new UserAuthz
+                {
+                    Id = 2,
+                    Login = "userAdam",
+                    Role = "Adam"
+                };
 
-            adam.Password =
-                hasher.HashPassword(adam, "adam123");
+                adam.Password =
+                    hasher.HashPassword(adam, "adam123");
+
+                context.UserAuthorizations.Add(adam);
+            }
+            //--------------
 
 
-            var bram = new UserAuthz
+            //------------
+            if (!context.UserAuthorizations.Any(x => x.Login == "userBram"))
             {
-                Id = 3,
-                Login = "userBram",
-                Role = "Bram"
-            };
+                var bram = new UserAuthz
+                {
+                    Id = 3,
+                    Login = "userBram",
+                    Role = "Bram"
+                };
 
-            bram.Password =
-                hasher.HashPassword(bram, "bram123");
+                bram.Password =
+                    hasher.HashPassword(bram, "bram123");
+
+                context.UserAuthorizations.Add(bram);
+            }
+
+            //-------------
 
 
-            context.UserAuthorizations.AddRange(
-                admin,
-                adam,
-                bram);
+            //----------------
+            if (!context.UserAuthorizations.Any(x => x.Login == "userCerber"))
+            {
+                var cerber = new UserAuthz
+                {
+                    Id = 4,
+                    Login = "userCerber",
+                    Role = "Cerber"
+                };
+
+                cerber.Password =
+                    hasher.HashPassword(
+                        cerber,
+                        "cerber123");
+
+                context.UserAuthorizations.Add(cerber);
+            }
+            //----------------
+
 
             context.SaveChanges();
         }
