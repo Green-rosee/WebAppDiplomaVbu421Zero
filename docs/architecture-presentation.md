@@ -7,7 +7,8 @@ flowchart LR
 
     User --> Web["ASP.NET Core .NET 10<br/>MVC + Razor + Blazor"]
 
-    Web --> Auth["JWT Authentication<br/>FluentValidation"]
+    Web --> Auth["JWT Authentication"]
+    Web --> Validation["FluentValidation"]
 
     Web --> Adam["SiteAdam<br/>Центробежные насосы"]
     Web --> Bram["SiteBram<br/>Якорные лебёдки"]
