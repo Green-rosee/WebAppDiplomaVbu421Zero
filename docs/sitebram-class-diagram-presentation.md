@@ -72,10 +72,16 @@ WinchAnchorPage --> WinchAnchorHistoryService : история
 WinchAnchorPage --> WinchAnchorExcelExportService : экспорт
 
 WinchAnchorService --> BramDbContext : данные оборудования
+
 WinchAnchorHistoryService --> BramDbContext : сохранение
+WinchAnchorHistoryService --> CalculationHistory : формирует историю
+BramDbContext --> CalculationHistory : хранит
 
 WinchAnchorExcelImportService --> ExcelSource : читает
 WinchAnchorExcelImportService --> BramDbContext : импортирует
+
+WinchAnchorExcelExportService --> ExcelDocument : формирует
+```
 
 WinchAnchorExcelExportService --> ExcelDocument : формирует
 ```
