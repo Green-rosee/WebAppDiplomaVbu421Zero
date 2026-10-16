@@ -4,66 +4,105 @@ using WebAppEstimate.Areas.SiteCerber.Models;
 
 namespace WebAppEstimate.Areas.SiteCerber.Services;
 
+
+
+/// <summary>
+/// Сервис генерации параметрической 3D-модели фланца через OpenSCAD.
+/// Создаёт SCAD-файл, STL-модель и PNG-предпросмотр.
+/// </summary>
 public class OpenScadService : IOpenScadService
 {
-    //создать в этом классе список коментариев под методами что они делают
     private readonly IWebHostEnvironment _environment;
 
-    public OpenScadService(IWebHostEnvironment environment)
+    /// <summary>
+    /// Создаёт сервис генерации OpenSCAD-моделей.
+    /// </summary>
+    /// <param name="environment">
+    /// Информация о файловой структуре и корневых каталогах приложения.
+    /// </param>
+    public OpenScadService(
+        IWebHostEnvironment environment)
     {
         _environment = environment;
     }
 
-    public async Task<string> GenerateFlangeAsync(FlangeModel model)
+    /// <summary>
+    /// Генерирует параметрическую модель фланца
+    /// на основе переданных геометрических параметров.
+    /// </summary>
+    /// <param name="model">
+    /// Параметры фланца:
+    /// наружный и внутренний диаметры, толщина,
+    /// количество отверстий, их диаметр
+    /// и диаметр болтовой окружности.
+    /// </param>
+    /// <returns>
+    /// Публичный URL созданного STL-файла.
+    /// </returns>
+    public async Task<string> GenerateFlangeAsync(
+        FlangeModel model)
     {
-        var fileName = $"flange_{Guid.NewGuid():N}";
+        // Формируем уникальное имя набора файлов,
+        // чтобы несколько генераций не перезаписывали друг друга.
+        var fileName =
+            $"flange_{Guid.NewGuid():N}";
 
-        // Внутренние файлы OpenSCAD
-        var outputDirectory = Path.Combine(
-            _environment.ContentRootPath,
-            "Areas",
-            "SiteCerber",
-            "OpenScad",
-            "Generated");
+        // Внутренняя папка для служебных файлов OpenSCAD.
+        var outputDirectory =
+            Path.Combine(
+                _environment.ContentRootPath,
+                "Areas",
+                "SiteCerber",
+                "OpenScad",
+                "Generated");
 
-        Directory.CreateDirectory(outputDirectory);
+        Directory.CreateDirectory(
+            outputDirectory);
 
-        var scadPath = Path.Combine(
-            outputDirectory,
-            $"{fileName}.scad");
+        var scadPath =
+            Path.Combine(
+                outputDirectory,
+                $"{fileName}.scad");
 
-        var stlPath = Path.Combine(
-            outputDirectory,
-            $"{fileName}.stl");
+        var stlPath =
+            Path.Combine(
+                outputDirectory,
+                $"{fileName}.stl");
 
-        // Публичная папка для preview
-        var publicDirectory = Path.Combine(
-            _environment.WebRootPath,
-            "generated",
-            "sitecerber");
+        // Публичная папка wwwroot для файлов,
+        // которые должны быть доступны из браузера.
+        var publicDirectory =
+            Path.Combine(
+                _environment.WebRootPath,
+                "generated",
+                "sitecerber");
 
-        Directory.CreateDirectory(publicDirectory);
+        Directory.CreateDirectory(
+            publicDirectory);
 
-        var previewPath = Path.Combine(
-            publicDirectory,
-            $"{fileName}.png");
-        //------------------
-        var publicStlPath = Path.Combine(
-            publicDirectory,
-            $"{fileName}.stl");
+        var previewPath =
+            Path.Combine(
+                publicDirectory,
+                $"{fileName}.png");
 
-        /*File.Copy(
-            stlPath,
-            publicStlPath,
-            overwrite: true);*/
-        //------------------
+        var publicStlPath =
+            Path.Combine(
+                publicDirectory,
+                $"{fileName}.stl");
 
-        var culture = CultureInfo.InvariantCulture;
+        // Используем InvariantCulture,
+        // чтобы десятичные значения в SCAD записывались через точку.
+        var culture =
+            CultureInfo.InvariantCulture;
 
+        // OpenSCAD использует радиус болтовой окружности,
+        // поэтому диаметр преобразуется в радиус.
         var boltCircleRadius =
             model.BoltCircleDiameter / 2.0;
-        //--------------------
 
+        // Формируем параметрический OpenSCAD-код.
+        // Основной цилиндр образует тело фланца,
+        // а внутренний цилиндр и отверстия вычитаются через difference().
         var scad = $$"""
                      difference()
                      {
@@ -101,10 +140,12 @@ public class OpenScadService : IOpenScadService
                      }
                      """;
 
+        // Сохраняем сформированный OpenSCAD-скрипт на диск.
         await File.WriteAllTextAsync(
             scadPath,
             scad);
 
+        // Запускаем OpenSCAD для генерации STL-файла.
         var processInfo =
             new ProcessStartInfo
             {
@@ -123,20 +164,28 @@ public class OpenScadService : IOpenScadService
             Process.Start(processInfo);
 
         if (process == null)
+        {
             throw new InvalidOperationException(
                 "Не удалось запустить OpenSCAD.");
+        }
 
         await process.WaitForExitAsync();
 
+        // Если OpenSCAD завершился с ошибкой,
+        // получаем stderr и передаём его в исключение.
         if (process.ExitCode != 0)
         {
             var error =
-                await process.StandardError.ReadToEndAsync();
+                await process.StandardError
+                    .ReadToEndAsync();
 
             throw new InvalidOperationException(
                 $"OpenSCAD error: {error}");
         }
 
+        // Создаём PNG-предпросмотр модели.
+        // xvfb-run позволяет запускать графический OpenSCAD
+        // в контейнере без физического дисплея.
         var previewProcessInfo =
             new ProcessStartInfo
             {
@@ -155,35 +204,54 @@ public class OpenScadService : IOpenScadService
         previewProcessInfo.ArgumentList.Add("-o");
         previewProcessInfo.ArgumentList.Add(previewPath);
 
-        previewProcessInfo.ArgumentList.Add("--imgsize=1000,800");
+        previewProcessInfo.ArgumentList.Add(
+            "--imgsize=1000,800");
 
-        previewProcessInfo.ArgumentList.Add(scadPath);
+        previewProcessInfo.ArgumentList.Add(
+            scadPath);
 
         using var previewProcess =
-            Process.Start(previewProcessInfo);
+            Process.Start(
+                previewProcessInfo);
 
         if (previewProcess == null)
+        {
             throw new InvalidOperationException(
                 "Не удалось создать предпросмотр OpenSCAD.");
+        }
 
         await previewProcess.WaitForExitAsync();
 
         if (previewProcess.ExitCode != 0)
         {
             var error =
-                await previewProcess.StandardError.ReadToEndAsync();
+                await previewProcess.StandardError
+                    .ReadToEndAsync();
 
             throw new InvalidOperationException(
                 $"OpenSCAD preview error: {error}");
         }
 
-        // STL уже создан — теперь публикуем его
+        // Публикуем готовый STL в wwwroot,
+        // чтобы его можно было скачать через браузер.
         File.Copy(
             stlPath,
             publicStlPath,
             true);
 
-        return $"/generated/sitecerber/{fileName}.stl";
-        //return stlPath;
+        // Возвращаем URL публичного STL-файла.
+        return
+            $"/generated/sitecerber/{fileName}.stl";
     }
 }
+
+
+
+
+
+
+
+
+
+
+

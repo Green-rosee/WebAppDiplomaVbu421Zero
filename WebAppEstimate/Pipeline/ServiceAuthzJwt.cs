@@ -5,49 +5,85 @@ using WebAppEstimate.Data.Entity;
 
 namespace WebAppEstimate.Pipeline;
 
+
+
+/// <summary>
+/// Содержит настройку JWT-аутентификации приложения.
+/// Определяет правила проверки токена и способ его получения из cookie.
+/// </summary>
 public static class ServiceAuthzJwt
 {
+    /// <summary>
+    /// Регистрирует JWT Bearer-аутентификацию
+    /// и параметры проверки JWT-токенов.
+    /// </summary>
+    /// <param name="services">
+    /// Коллекция сервисов DI-контейнера ASP.NET Core.
+    /// </param>
+    /// <returns>
+    /// Та же коллекция сервисов для поддержки цепочки вызовов.
+    /// </returns>
     public static IServiceCollection AddServiceAddJwtAuthentication(
         this IServiceCollection services)
     {
         services
-            .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddAuthentication(
+                JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    // указывает, будет ли валидироваться издатель при валидации токена
-                    ValidateIssuer = true,
-                    // строка, представляющая издателя
-                    ValidIssuer = AuthOptions.ISSUER,
-
-
-                    // будет ли валидироваться потребитель токена
-                    ValidateAudience = true,
-                    // установка потребителя токена
-                    ValidAudience = AuthOptions.AUDIENCE,
-
-
-                    // будет ли валидироваться время существования
-                    ValidateLifetime = true,
-                    // установка ключа безопасности
-                    IssuerSigningKey = AuthOptions.GetSymmetricSecurityKey(),
-
-                    // валидация ключа безопасности
-                    //ValidateIssuerSigningKey = true
-                };
-
-                options.Events = new JwtBearerEvents
-                {
-                    OnMessageReceived = context =>
+                // Настраиваем правила проверки JWT-токена.
+                options.TokenValidationParameters =
+                    new TokenValidationParameters
                     {
-                        context.Token =
-                            context.Request.Cookies["access_token"];
+                        // Проверяем, что токен создан
+                        // ожидаемым издателем.
+                        ValidateIssuer = true,
+                        ValidIssuer = AuthOptions.ISSUER,
 
-                        return Task.CompletedTask;
-                    }
-                };
+                        // Проверяем, что токен предназначен
+                        // для ожидаемого приложения.
+                        ValidateAudience = true,
+                        ValidAudience = AuthOptions.AUDIENCE,
+
+                        // Проверяем срок действия токена.
+                        ValidateLifetime = true,
+
+                        // Ключ используется для проверки
+                        // цифровой подписи JWT.
+                        IssuerSigningKey =
+                            AuthOptions.GetSymmetricSecurityKey(),
+
+                        // Явно включаем проверку подписи токена.
+                        ValidateIssuerSigningKey = true
+                    };
+
+                // По умолчанию JwtBearer ищет токен
+                // в заголовке Authorization.
+                // В этом приложении JWT хранится в HttpOnly cookie,
+                // поэтому извлекаем его из access_token.
+                options.Events =
+                    new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            context.Token =
+                                context.Request
+                                    .Cookies["access_token"];
+
+                            return Task.CompletedTask;
+                        }
+                    };
             });
+
         return services;
     }
 }
+
+
+
+
+
+
+
+
+

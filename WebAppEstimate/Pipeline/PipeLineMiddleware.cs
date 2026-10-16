@@ -3,42 +3,81 @@
 
 namespace WebAppEstimate.Pipeline;
 
+
+/// <summary>
+/// Настраивает HTTP middleware-конвейер приложения.
+/// Определяет порядок обработки ошибок, HTTPS,
+/// статических файлов, маршрутизации, аутентификации
+/// и авторизации.
+/// </summary>
 public static class PipeLineMiddleware
 {
-    public static IApplicationBuilder UsePipeline(this IApplicationBuilder app)
+    /// <summary>
+    /// Подключает основные middleware-компоненты приложения.
+    /// </summary>
+    /// <param name="app">
+    /// Конвейер обработки HTTP-запросов ASP.NET Core.
+    /// </param>
+    /// <returns>
+    /// Настроенный экземпляр <see cref="IApplicationBuilder"/>.
+    /// </returns>
+    public static IApplicationBuilder UsePipeline(
+        this IApplicationBuilder app)
     {
-        //------ Достаем информацию об окружении (Environment) через ApplicationServices
-        var environment = app.ApplicationServices.GetRequiredService<IWebHostEnvironment>();
+        // Получаем информацию о текущем окружении приложения.
+        var environment =
+            app.ApplicationServices
+                .GetRequiredService<IWebHostEnvironment>();
 
-
-        //------Исключения обработка
+        // В production-окружении используем централизованную
+        // обработку исключений и механизм HSTS.
         if (!environment.IsDevelopment())
         {
             app.UseExceptionHandler("/Home/Error");
             app.UseHsts();
         }
 
-        // Обработка HTTP ошибок:
-        // 404, 403 и т.д.
+        // Обрабатываем HTTP-коды ошибок, например 404 и 403,
+        // повторно выполняя запрос к специальной странице ошибки.
         app.UseStatusCodePagesWithReExecute(
-            "/Error/{0}"
-        );
+            "/Error/{0}");
 
-        //--------------
+        // Перенаправляем HTTP-запросы на HTTPS.
         app.UseHttpsRedirection();
-        
+
+        // Разрешаем отдачу статических файлов из wwwroot.
         app.UseStaticFiles();
+
+        // Подключаем маршрутизацию запросов.
         app.UseRouting();
-        //---
-        // --- ИСПРАВЛЕНИЕ 1: СТРОГИЙ ПОРЯДОК АУТЕНТИФИКАЦИИ ---
-        app.UseAuthentication(); // КРИТИЧЕСКИ ВАЖНО! Сначала проверяем КТО пользователь (Проверяем Куки)
-        app.UseAuthorization(); // Затем проверяем ЧТО ему разрешено (Проверяем роли, например, Admin)
-        
-        //--- Нужно для Razor Components / Blazor
+
+        // Сначала определяем личность пользователя
+        // на основе JWT-токена.
+        app.UseAuthentication();
+
+        // Затем проверяем права пользователя
+        // и доступ к ресурсам согласно его роли.
+        app.UseAuthorization();
+
+        // Защита Razor Components / Blazor
+        // от CSRF-запросов.
         app.UseAntiforgery();
-        //app.MapStaticAssets();
-        
 
         return app;
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

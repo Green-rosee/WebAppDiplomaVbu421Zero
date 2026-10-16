@@ -3,6 +3,7 @@ using Syncfusion.Blazor;
 
 namespace WebAppEstimate.Pipeline.PipelineBuilder;
 
+
 public static class ServiceBlazorRegistration
 {
     public static IServiceCollection AddApplicationBlazor(
@@ -16,4 +17,19 @@ public static class ServiceBlazorRegistration
 
         return services;
     }
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

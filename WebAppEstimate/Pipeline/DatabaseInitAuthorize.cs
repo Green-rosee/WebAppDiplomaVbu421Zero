@@ -4,11 +4,31 @@ using WebAppEstimate.Data.Entity;
 
 namespace WebAppEstimate.Pipeline;
 
+/// <summary>
+/// Выполняет первоначальную инициализацию базы данных авторизации.
+/// Создаёт базу при её отсутствии и добавляет стандартных пользователей,
+/// если соответствующих учётных записей ещё нет.
+/// </summary>
+
 public static class DatabaseInitAuthorize
 {
+    /// <summary>
+    /// Инициализирует базу данных авторизации приложения.
+    /// При необходимости пересоздаёт базу, создаёт её структуру
+    /// и добавляет стандартные учётные записи с хешированными паролями.
+    /// </summary>
+    /// <param name="app">
+    /// Конвейер ASP.NET Core, через который получается доступ
+    /// к зарегистрированным сервисам приложения.
+    /// </param>
+    /// <returns>
+    /// Исходный экземпляр <see cref="IApplicationBuilder"/>.
+    /// </returns>
+    /// 
     public static IApplicationBuilder InitializeAuthorize(this IApplicationBuilder app)
     {
-        //------------
+        // Создаём отдельную область DI,
+        // чтобы получить DbContext и конфигурацию приложения.
         using (var scope = app.ApplicationServices.CreateScope())
         {
             var context =
@@ -18,21 +38,24 @@ public static class DatabaseInitAuthorize
                 scope.ServiceProvider
                     .GetRequiredService<IConfiguration>();
 
+            // Флаг используется только для принудительного
+            // удаления и повторного создания базы авторизации.
             var resetDatabase =
                 configuration.GetValue<bool>(
                     "ResetAuthorizeDatabase");
 
             if (resetDatabase) context.Database.EnsureDeleted();
 
+            // Создаём базу и таблицы, если они ещё не существуют.
             context.Database.EnsureCreated();
 
-            /*if (context.UserAuthorizations.Any())
-                return app;*/
-
+            // PasswordHasher используется для безопасного хранения
+            // паролей вместо сохранения их в открытом виде.
             var hasher =
                 new PasswordHasher<UserAuthz>();
 
-            //-------------
+            // Создаём администратора только в том случае,
+            // если такой пользователь ещё отсутствует.
             if (!context.UserAuthorizations.Any(x => x.Login == "admins"))
             {
                 var admin = new UserAuthz
@@ -47,10 +70,8 @@ public static class DatabaseInitAuthorize
 
                 context.UserAuthorizations.Add(admin);
             }
-            //------------
-
-
-            //-------------
+            
+            // Пользователь функциональной области SiteAdam.
             if (!context.UserAuthorizations.Any(x => x.Login == "userAdam"))
             {
                 var adam = new UserAuthz
@@ -65,10 +86,10 @@ public static class DatabaseInitAuthorize
 
                 context.UserAuthorizations.Add(adam);
             }
-            //--------------
+            
 
 
-            //------------
+            // Пользователь функциональной области SiteBram.
             if (!context.UserAuthorizations.Any(x => x.Login == "userBram"))
             {
                 var bram = new UserAuthz
@@ -84,10 +105,8 @@ public static class DatabaseInitAuthorize
                 context.UserAuthorizations.Add(bram);
             }
 
-            //-------------
-
-
-            //----------------
+            
+            // Пользователь функциональной области SiteCerber.
             if (!context.UserAuthorizations.Any(x => x.Login == "userCerber"))
             {
                 var cerber = new UserAuthz
@@ -104,9 +123,9 @@ public static class DatabaseInitAuthorize
 
                 context.UserAuthorizations.Add(cerber);
             }
-            //----------------
-
-
+            // Сохраняем только новые учётные записи,
+            // которые были добавлены при текущем запуске.
+            
             context.SaveChanges();
         }
 

@@ -4,11 +4,26 @@ using WebAppEstimate.Areas.SiteCerber.Models;
 
 namespace WebAppEstimate.Areas.SiteCerber.Services;
 
+
+/// <summary>
+/// Сервис взаимодействия с GigaChat API.
+/// Получает параметры фланца из текстового описания пользователя
+/// и преобразует ответ модели в объект <see cref="FlangeModel"/>.
+/// </summary>
 public class GigaChatService : IGigaChatService
 {
     private readonly IConfiguration _configuration;
     private readonly HttpClient _httpClient;
 
+    /// <summary>
+    /// Создаёт сервис для работы с GigaChat API.
+    /// </summary>
+    /// <param name="httpClient">
+    /// HTTP-клиент для отправки запросов к API.
+    /// </param>
+    /// <param name="configuration">
+    /// Конфигурация приложения, содержащая параметры доступа к GigaChat.
+    /// </param>
     public GigaChatService(
         HttpClient httpClient,
         IConfiguration configuration)
@@ -17,19 +32,39 @@ public class GigaChatService : IGigaChatService
         _configuration = configuration;
     }
 
-    public async Task<FlangeModel?> ParseFlangeAsync(string prompt)
+    /// <summary>
+    /// Отправляет текстовое описание фланца в GigaChat
+    /// и извлекает из ответа структурированные геометрические параметры.
+    /// </summary>
+    /// <param name="prompt">
+    /// Текстовое описание фланца, введённое пользователем.
+    /// </param>
+    /// <returns>
+    /// Объект <see cref="FlangeModel"/> с распознанными параметрами
+    /// либо null, если корректный ответ получить не удалось.
+    /// </returns>
+    public async Task<FlangeModel?> ParseFlangeAsync(
+        string prompt)
     {
-        var accessToken = await GetAccessTokenAsync();
+        // Получаем OAuth access_token,
+        // необходимый для доступа к GigaChat API.
+        var accessToken =
+            await GetAccessTokenAsync();
 
-        using var request = new HttpRequestMessage(
-            HttpMethod.Post,
-            "https://api.giga.chat/v1/chat/completions");
+        using var request =
+            new HttpRequestMessage(
+                HttpMethod.Post,
+                "https://api.giga.chat/v1/chat/completions");
 
+        // Передаём access_token в заголовке Authorization.
         request.Headers.Authorization =
             new AuthenticationHeaderValue(
                 "Bearer",
                 accessToken);
 
+        // Формируем запрос к языковой модели.
+        // System prompt задаёт правила извлечения параметров,
+        // а response_format требует строгий JSON по заданной схеме.
         var body = new
         {
             model = "GigaChat-2-Max",
@@ -112,19 +147,27 @@ public class GigaChatService : IGigaChatService
             }
         };
 
+        // Сериализуем объект запроса в JSON.
         request.Content =
             JsonContent.Create(body);
 
+        // Отправляем запрос в GigaChat API.
         using var response =
             await _httpClient.SendAsync(request);
 
         var responseText =
-            await response.Content.ReadAsStringAsync();
+            await response.Content
+                .ReadAsStringAsync();
 
+        // При ошибке API возвращаем техническую информацию
+        // через исключение.
         if (!response.IsSuccessStatusCode)
+        {
             throw new InvalidOperationException(
                 $"GigaChat error: {responseText}");
+        }
 
+        // Извлекаем поле content из ответа chat/completions.
         using var document =
             JsonDocument.Parse(responseText);
 
@@ -138,8 +181,8 @@ public class GigaChatService : IGigaChatService
         if (string.IsNullOrWhiteSpace(content))
             return null;
 
-        Console.WriteLine("GigaChat content:");
-        Console.WriteLine(content);
+        // Преобразуем JSON-ответ модели
+        // в объект FlangeModel.
         return JsonSerializer.Deserialize<FlangeModel>(
             content,
             new JsonSerializerOptions
@@ -148,45 +191,66 @@ public class GigaChatService : IGigaChatService
             });
     }
 
+    /// <summary>
+    /// Получает временный OAuth access_token
+    /// для обращения к GigaChat API.
+    /// </summary>
+    /// <returns>
+    /// Строковое значение access_token.
+    /// </returns>
     private async Task<string> GetAccessTokenAsync()
     {
+        // Получаем ключ авторизации из конфигурации приложения.
         var authorizationKey =
-            _configuration["GigaChat:AuthorizationKey"];
+            _configuration[
+                "GigaChat:AuthorizationKey"];
 
-        if (string.IsNullOrWhiteSpace(authorizationKey))
+        if (string.IsNullOrWhiteSpace(
+                authorizationKey))
+        {
             throw new InvalidOperationException(
                 "GigaChat Authorization Key не найден.");
+        }
 
-        using var request = new HttpRequestMessage(
-            HttpMethod.Post,
-            "https://ngw.devices.sberbank.ru:9443/api/v2/oauth");
+        using var request =
+            new HttpRequestMessage(
+                HttpMethod.Post,
+                "https://ngw.devices.sberbank.ru:9443/api/v2/oauth");
 
+        // Для получения токена используется Basic-аутентификация.
         request.Headers.Authorization =
             new AuthenticationHeaderValue(
                 "Basic",
                 authorizationKey);
 
+        // Уникальный идентификатор запроса.
         request.Headers.Add(
             "RqUID",
             Guid.NewGuid().ToString());
 
+        // Указываем scope доступа к GigaChat API.
         request.Content =
             new FormUrlEncodedContent(
                 new Dictionary<string, string>
                 {
-                    ["scope"] = "GIGACHAT_API_PERS"
+                    ["scope"] =
+                        "GIGACHAT_API_PERS"
                 });
 
         using var response =
             await _httpClient.SendAsync(request);
 
         var responseText =
-            await response.Content.ReadAsStringAsync();
+            await response.Content
+                .ReadAsStringAsync();
 
         if (!response.IsSuccessStatusCode)
+        {
             throw new InvalidOperationException(
                 $"Ошибка получения GigaChat token: {responseText}");
+        }
 
+        // Извлекаем access_token из OAuth-ответа.
         using var document =
             JsonDocument.Parse(responseText);
 
@@ -197,3 +261,14 @@ public class GigaChatService : IGigaChatService
                    "GigaChat не вернул access_token.");
     }
 }
+
+
+
+
+
+
+
+
+
+
+
