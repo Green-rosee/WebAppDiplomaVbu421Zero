@@ -2,48 +2,94 @@ using WebAppEstimate.Areas.SiteAdam.Data.DbSetContext;
 
 namespace WebAppEstimate.Areas.SiteAdam.Pipeline;
 
+
+
+
+/// <summary>
+/// Выполняет первоначальную инициализацию базы данных SiteAdam.
+/// При необходимости пересоздаёт базу и заполняет её начальными данными.
+/// </summary>
 public static class DatabaseInitPumpCentrifugal
 {
-    public static IApplicationBuilder InitializePumpCentrifugal(this IApplicationBuilder app)
+    /// <summary>
+    /// Инициализирует базу данных центробежных насосов.
+    /// Проверяет настройку сброса базы, создаёт структуру БД
+    /// и при отсутствии исходных данных запускает заполнение.
+    /// </summary>
+    /// <param name="app">
+    /// Конвейер ASP.NET Core, через который получается доступ
+    /// к зарегистрированным сервисам приложения.
+    /// </param>
+    /// <returns>
+    /// Исходный экземпляр <see cref="IApplicationBuilder"/>.
+    /// </returns>
+    public static IApplicationBuilder InitializePumpCentrifugal(
+        this IApplicationBuilder app)
     {
-        using (var scope = app.ApplicationServices.CreateScope())
+        // Создаём отдельную область DI
+        // для работы с контекстом базы данных и конфигурацией.
+        using (var scope =
+               app.ApplicationServices.CreateScope())
         {
-            var services = scope.ServiceProvider;
+            var services =
+                scope.ServiceProvider;
 
             try
             {
-                var context = services.GetRequiredService<AppDbContextCentrifugalPump>();
-                //---
-                var configuration = services.GetRequiredService<IConfiguration>();
-                var resetDatabase = configuration.GetValue<bool>("ResetPumpDatabaseAdam");
+                var context =
+                    services.GetRequiredService<
+                        AppDbContextCentrifugalPump>();
 
-                if (resetDatabase) context.Database.EnsureDeleted();
+                var configuration =
+                    services.GetRequiredService<
+                        IConfiguration>();
 
-                //---было до упоковки в докер
-                //context.Database.EnsureDeleted();
+                // Определяем, требуется ли принудительно
+                // удалить и заново создать базу SiteAdam.
+                var resetDatabase =
+                    configuration.GetValue<bool>(
+                        "ResetPumpDatabaseAdam");
+
+                if (resetDatabase)
+                {
+                    context.Database.EnsureDeleted();
+                }
+
+                // Создаём базу данных и таблицы,
+                // если они ещё не существуют.
                 context.Database.EnsureCreated();
-                //---
-                if (resetDatabase || !context.PumpSeries.Any()) DbInitializer.SeedData(context);
 
-
-                //===
-                // 2. ИСПРАВЛЕНИЕ: Вызываем ваш метод генерации данных Faker, который мы написали ранее
-                // (Если метод SeedData находится в другом классе, например DbInitializer, 
-                // укажите здесь: DbInitializer.SeedData(context);)
-                //SeedData(context);
+                // Если база была пересоздана
+                // или справочник серий пуст,
+                // загружаем начальные данные.
+                if (resetDatabase ||
+                    !context.PumpSeries.Any())
+                {
+                    DbInitializer.SeedData(context);
+                }
             }
             catch (Exception e)
             {
-                var logger = services.GetRequiredService<ILogger<Program>>();
-                logger.LogError(e, "Ошибка при инициализации базы данных.");
+                // Записываем ошибку инициализации
+                // через стандартную систему логирования ASP.NET Core.
+                var logger =
+                    services.GetRequiredService<
+                        ILogger<Program>>();
+
+                logger.LogError(
+                    e,
+                    "Ошибка при инициализации базы данных.");
             }
         }
 
         return app;
     }
-
-    private static void SeedData(AppDbContextCentrifugalPump context)
-    {
-        DbInitializer.SeedData(context);
-    }
 }
+
+
+
+
+
+
+
+

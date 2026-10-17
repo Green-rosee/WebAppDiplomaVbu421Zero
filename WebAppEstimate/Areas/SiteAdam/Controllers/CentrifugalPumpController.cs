@@ -7,6 +7,13 @@ using WebAppEstimate.Areas.SiteAdam.Services;
 
 namespace WebAppEstimate.Areas.SiteAdam.Controllers;
 
+
+
+/// <summary>
+/// Контроллер расчёта центробежного насоса.
+/// Отвечает за отображение формы, проверку введённых данных
+/// и передачу расчёта в сервис бизнес-логики.
+/// </summary>
 [Area("SiteAdam")]
 [Authorize(Roles = "Admin,Adam")]
 public class CentrifugalPumpController : Controller
@@ -14,7 +21,15 @@ public class CentrifugalPumpController : Controller
     private readonly ICentrifugalPumpService _pumpService;
     private readonly IValidator<CentrifugalPumpModel> _validator;
 
-    // Внедряем сервис расчета и валидатор FluentValidation через конструктор
+    /// <summary>
+    /// Создаёт контроллер расчёта центробежного насоса.
+    /// </summary>
+    /// <param name="pumpService">
+    /// Сервис расчёта параметров и трудоёмкости насоса.
+    /// </param>
+    /// <param name="validator">
+    /// Валидатор входной модели FluentValidation.
+    /// </param>
     public CentrifugalPumpController(
         ICentrifugalPumpService pumpService,
         IValidator<CentrifugalPumpModel> validator)
@@ -23,72 +38,103 @@ public class CentrifugalPumpController : Controller
         _validator = validator;
     }
 
-    // GET: push
+    /// <summary>
+    /// Отображает главную страницу раздела центробежных насосов.
+    /// </summary>
     [HttpGet]
     public IActionResult Index()
     {
         return View();
     }
 
-    // 1. Отображение формы расчета
+    /// <summary>
+    /// Отображает форму расчёта центробежного насоса
+    /// и загружает список доступных серий из базы данных.
+    /// </summary>
     [HttpGet]
-    //[Authorize(Roles = "Admin,Adam")]
     public async Task<IActionResult> Calculate()
     {
-        /*var model = new CentrifugalPumpModel
-        {
-            // Наполняем опции серий динамически из БД через сервис
-            //SeriesOptions = await _pumpService.GetSeriesOptionsAsync()
-            SeriesOptions = await _pumpService.GetSeriesOptionsAsync() ?? new List<SelectListItem>()
-        };*/
-
-        var model = new CentrifugalPumpModel();
-
-        // Получаем данные из сервиса
-        model.SeriesOptions = await _pumpService.GetSeriesOptionsAsync();
-
-        // ЖЕСТКИЙ ТЕСТ: Если база пуста, принудительно пишем данные, чтобы исключить проблему с БД
-        if (model.SeriesOptions == null || !model.SeriesOptions.Any())
-            model.SeriesOptions = new List<SelectListItem>
+        var model =
+            new CentrifugalPumpModel
             {
-                new() { Value = "1", Text = "БАЗА ПУСТА: Тест Серия WA" },
-                new() { Value = "2", Text = "БАЗА ПУСТА: Тест Серия NT" }
+                SeriesOptions =
+                    await _pumpService.GetSeriesOptionsAsync()
+                    ?? new List<SelectListItem>()
             };
 
-        return View("CentrifugalPumpForm", model);
+        return View(
+            "CentrifugalPumpForm",
+            model);
     }
 
-    // 2. Обработка отправленной формы и выполнение подбора часов
+    /// <summary>
+    /// Обрабатывает отправленную форму,
+    /// проверяет введённые данные и выполняет расчёт.
+    /// </summary>
+    /// <param name="model">
+    /// Модель с параметрами центробежного насоса,
+    /// введёнными пользователем.
+    /// </param>
     [HttpPost]
     [ValidateAntiForgeryToken]
-    //[Authorize(Roles = "Admin,Adam")]
-    public async Task<IActionResult> Calculate(CentrifugalPumpModel model)
+    public async Task<IActionResult> Calculate(
+        CentrifugalPumpModel model)
     {
-        // Ручной вызов FluentValidation
-        var validationResult = await _validator.ValidateAsync(model);
+        // Выполняем ручную проверку модели
+        // через FluentValidation.
+        var validationResult =
+            await _validator.ValidateAsync(model);
 
         if (!validationResult.IsValid)
         {
-            // Переносим ошибки в ModelState для отображения в Razor View
+            // Переносим ошибки FluentValidation в ModelState,
+            // чтобы Razor View мог отобразить их пользователю.
             foreach (var error in validationResult.Errors)
-                ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
+            {
+                ModelState.AddModelError(
+                    error.PropertyName,
+                    error.ErrorMessage);
+            }
 
-            // Пересобираем выпадающий список, чтобы страница не упала
-            //model.SeriesOptions = await _pumpService.GetSeriesOptionsAsync();
-            model.SeriesOptions = await _pumpService.GetSeriesOptionsAsync() ?? new List<SelectListItem>();
+            // Повторно загружаем список серий,
+            // так как он не передаётся обратно из HTML-формы.
+            model.SeriesOptions =
+                await _pumpService.GetSeriesOptionsAsync()
+                ?? new List<SelectListItem>();
 
-            return View("CentrifugalPumpForm", model);
+            return View(
+                "CentrifugalPumpForm",
+                model);
         }
 
-        // --- ВЫЗОВ ВАШЕЙ БИЗНЕС-ЛОГИКИ ---
-        // Сервис ищет ближайшие параметры по Math.Abs, умножает на количество и выставляет IsCalculated = true
-        model = await _pumpService.CalculateClosestHoursAsync(model);
-        model.SeriesOptions = await _pumpService.GetSeriesOptionsAsync() ?? new List<SelectListItem>();
+        // Передаём проверенную модель
+        // в сервис бизнес-логики для выполнения расчёта.
+        model =
+            await _pumpService
+                .CalculateClosestHoursAsync(model);
 
-        // Снова заполняем список серий для отображения на той же странице
-        //model.SeriesOptions = await _pumpService.GetSeriesOptionsAsync();
+        // Повторно заполняем список серий
+        // для корректного отображения формы после расчёта.
+        model.SeriesOptions =
+            await _pumpService.GetSeriesOptionsAsync()
+            ?? new List<SelectListItem>();
 
-        // Возвращаем ту же View: теперь блок с итоговыми часами отобразится внизу формы
-        return View("CentrifugalPumpForm", model);
+        return View(
+            "CentrifugalPumpForm",
+            model);
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
