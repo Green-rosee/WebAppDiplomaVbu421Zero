@@ -5,12 +5,25 @@ using WebAppEstimate.Areas.SiteBram.Services;
 
 namespace WebAppEstimate.Tests;
 
+
+
+/// <summary>
+/// Модульные тесты сервиса подбора якорной лебёдки.
+/// Проверяют алгоритм выбора наиболее подходящей конструкции
+/// по заданным пользователем параметрам.
+/// </summary>
 public class WinchAnchorServiceTests
 {
+    /// <summary>
+    /// Проверяет, что сервис выбирает конструкцию
+    /// с минимальным относительным отклонением
+    /// от заданных параметров.
+    /// </summary>
     [Fact]
     public async Task FindDesignAsync_ShouldReturnNearestDesign()
     {
         // Arrange
+        // Создаём отдельную InMemory-базу для текущего теста.
         var options =
             new DbContextOptionsBuilder<AppDbContextWinchAnchor>()
                 .UseInMemoryDatabase(
@@ -28,6 +41,8 @@ public class WinchAnchorServiceTests
             Name = "TestSeries"
         };
 
+        // Создаём несколько вариантов конструкции
+        // с различными параметрами.
         var design1 = new WinchAnchorDesign
         {
             Id = Guid.NewGuid(),
@@ -74,6 +89,7 @@ public class WinchAnchorServiceTests
             new WinchAnchorService(context);
 
         // Act
+        // Выполняем подбор для промежуточных параметров.
         var result =
             await service.FindDesignAsync(
                 seriesId,
@@ -82,6 +98,8 @@ public class WinchAnchorServiceTests
                 25);
 
         // Assert
+        // Проверяем, что алгоритм выбрал
+        // ближайший вариант Design-2.
         Assert.NotNull(result);
 
         Assert.Equal(
@@ -100,7 +118,11 @@ public class WinchAnchorServiceTests
             27,
             result.ValueKgMm);
     }
-    
+
+    /// <summary>
+    /// Проверяет, что сервис возвращает null,
+    /// если для выбранной серии отсутствуют конструкции.
+    /// </summary>
     [Fact]
     public async Task FindDesignAsync_ShouldReturnNull_WhenSeriesHasNoDesigns()
     {
@@ -122,6 +144,7 @@ public class WinchAnchorServiceTests
             Name = "EmptySeries"
         };
 
+        // Добавляем серию, но не добавляем для неё конструкции.
         context.WinchAnchorSeries.Add(series);
 
         await context.SaveChangesAsync();
@@ -140,7 +163,12 @@ public class WinchAnchorServiceTests
         // Assert
         Assert.Null(result);
     }
-    
+
+    /// <summary>
+    /// Проверяет, что при подборе учитываются только конструкции
+    /// выбранной серии, даже если в другой серии существует
+    /// более точное совпадение параметров.
+    /// </summary>
     [Fact]
     public async Task FindDesignAsync_ShouldIgnoreOtherSeries()
     {
@@ -188,7 +216,8 @@ public class WinchAnchorServiceTests
             Name = "OtherDesign",
             WinchAnchorSeriesId = otherSeriesId,
 
-            // Специально делаем почти идеальное совпадение
+            // Конструкция другой серии специально имеет
+            // практически идеальное совпадение параметров.
             ValueKg = 1300,
             ValueMm = 145,
             ValueKgMm = 25,
@@ -218,6 +247,7 @@ public class WinchAnchorServiceTests
                 25);
 
         // Assert
+        // Конструкция другой серии не должна участвовать в подборе.
         Assert.NotNull(result);
 
         Assert.Equal(
@@ -228,7 +258,11 @@ public class WinchAnchorServiceTests
             targetSeriesId,
             result.WinchAnchorSeriesId);
     }
-    
+
+    /// <summary>
+    /// Проверяет, что при наличии полного совпадения параметров
+    /// сервис выбирает именно эту конструкцию.
+    /// </summary>
     [Fact]
     public async Task FindDesignAsync_ShouldReturnExactMatch_WhenExactDesignExists()
     {
@@ -315,3 +349,14 @@ public class WinchAnchorServiceTests
             result.ValueKgMm);
     }
 }
+
+
+
+
+
+
+
+
+
+
+
