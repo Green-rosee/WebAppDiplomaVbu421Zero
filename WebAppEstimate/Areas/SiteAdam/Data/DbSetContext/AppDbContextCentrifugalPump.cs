@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using WebAppEstimate.Areas.SiteAdam.Data.Entity.CentrifugalPumps;
 using WebAppEstimate.Areas.SiteAdam.Data.Entity.Pumps.CentrifugalPumpsCalculationHistory;
+using WebAppEstimate.Areas.SiteAdam.Models;
 
 namespace WebAppEstimate.Areas.SiteAdam.Data.DbSetContext;
 
@@ -23,6 +24,7 @@ public class AppDbContextCentrifugalPump : DbContext
     public DbSet<PumpImpeller> PumpImpellers { get; set; } = null!;
     public DbSet<PumpWeight> PumpWeights { get; set; } = null!;
     public DbSet<PumpVolume> PumpVolumes { get; set; } = null!;
+    public DbSet<PumpNormativeSet> PumpNormativeSets { get; set; }
 
     public DbSet<PumpCentrifugalDesign> PumpCentrifugalDesigns { get; set; } = null!;
 

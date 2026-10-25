@@ -57,6 +57,11 @@ public static class ServiceApplicationRegistration
         services.AddScoped<
             ICentrifugalPumpExcelService,
             CentrifugalPumpExcelService>();
+        
+        // Сервис для загрузки  Excel-файлов в БД  для SiteAdam.
+        services.AddScoped<
+            ICentrifugalPumpExcelImportService,
+            CentrifugalPumpExcelImportService>();
 
 
         // ---------------- SiteBram ----------------

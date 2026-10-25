@@ -35,7 +35,7 @@
            class="btn btn-success">
             Открыть Excel таблицу
         </a>
-        
+
         <a asp-area="SiteAdam"
            asp-controller="CentrifugalPump"
            asp-action="Calculate"
@@ -73,6 +73,7 @@
             <thead>
             <tr>
                 <th>Наименование ремонтируемого насосного агрегата.</th>
+                <th>Нормативный сборник</th>
                 <th>Количество.</th>
                 <th>Стоимость часа,уе.</th>
                 <th>Сумма часов,трудоемкость.</th>
@@ -97,6 +98,10 @@
                             <br/>
                             Масса: @item.Weight кг
                         </small>
+                    </td>
+
+                    <td>
+                        @item.NormativeSetName
                     </td>
 
                     <td>@item.Number</td>

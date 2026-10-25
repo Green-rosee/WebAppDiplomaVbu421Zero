@@ -10,4 +10,6 @@ public interface ICentrifugalPumpService
 
     // Метод для выполнения расчета близких значений и суммирования часов
     Task<CentrifugalPumpModel> CalculateClosestHoursAsync(CentrifugalPumpModel model);
+    
+    Task<List<SelectListItem>> GetNormativeSetOptionsAsync();
 }

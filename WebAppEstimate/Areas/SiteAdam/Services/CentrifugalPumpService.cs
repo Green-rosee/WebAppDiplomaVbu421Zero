@@ -63,30 +63,36 @@ public class CentrifugalPumpService : ICentrifugalPumpService
     {
         // Ищем ближайшее значение рабочего колеса
         // для выбранной серии насоса.
+        
         var closestImpeller =
             await _dbContext.PumpImpellers
                 .Where(i =>
-                    i.PumpSeriesId == model.SelectedSeriesId)
+                    i.PumpSeriesId == model.SelectedSeriesId &&
+                    i.PumpNormativeSetId == model.SelectedNormativeSetId)
                 .OrderBy(i =>
                     Math.Abs(i.Impeller - model.Impeller))
                 .FirstOrDefaultAsync();
 
         // Ищем ближайшее значение массы
         // для выбранной серии насоса.
+        
         var closestWeight =
             await _dbContext.PumpWeights
                 .Where(w =>
-                    w.PumpSeriesId == model.SelectedSeriesId)
+                    w.PumpSeriesId == model.SelectedSeriesId &&
+                    w.PumpNormativeSetId == model.SelectedNormativeSetId)
                 .OrderBy(w =>
                     Math.Abs(w.Weight - model.Weight))
                 .FirstOrDefaultAsync();
 
         // Ищем ближайшее значение объёма
         // для выбранной серии насоса.
+        
         var closestVolume =
             await _dbContext.PumpVolumes
                 .Where(v =>
-                    v.PumpSeriesId == model.SelectedSeriesId)
+                    v.PumpSeriesId == model.SelectedSeriesId &&
+                    v.PumpNormativeSetId == model.SelectedNormativeSetId)
                 .OrderBy(v =>
                     Math.Abs(v.Volume - model.Volume))
                 .FirstOrDefaultAsync();
@@ -131,6 +137,23 @@ public class CentrifugalPumpService : ICentrifugalPumpService
         model.IsCalculated = true;
 
         return model;
+    }
+    
+    /// <summary>
+    /// Получает список загруженных нормативных наборов
+    /// для выбора на странице расчёта.
+    /// </summary>
+    public async Task<List<SelectListItem>>
+        GetNormativeSetOptionsAsync()
+    {
+        return await _dbContext.PumpNormativeSets
+            .OrderBy(x => x.Name)
+            .Select(x => new SelectListItem
+            {
+                Value = x.Id.ToString(),
+                Text = $"{x.Name} ({x.FileName})"
+            })
+            .ToListAsync();
     }
 }
 

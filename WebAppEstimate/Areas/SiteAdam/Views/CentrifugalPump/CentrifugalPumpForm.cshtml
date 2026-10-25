@@ -11,9 +11,20 @@
 <div class="container my-5">
     <!-- Кнопка назад -->
     <div class="mb-4">
-        <a asp-area="SiteAdam" asp-controller="Home" asp-action="Index" class="text-muted text-decoration-none small">
+        <a asp-area="SiteAdam"
+           asp-controller="Home"
+           asp-action="Index"
+           class="text-muted text-decoration-none small">
             &larr; Вернуться к выбору насосов
         </a>
+
+        <a asp-area="SiteAdam"
+           asp-controller="CentrifugalPumpImport"
+           asp-action="Index"
+           class="btn btn-outline-primary">
+            Загрузить нормативный Excel
+        </a>
+
     </div>
 
     <div class="row justify-content-center">
@@ -59,14 +70,39 @@
                     <span asp-validation-for="Name" class="text-danger small d-block mt-1"></span>
                 </div>
 
-
-                <!-- 2. Выбор серии  -->
+                <!-- 2. Выбор нормативного сборника  -->
                 <div class="mb-3">
-                    <label asp-for="SelectedSeriesId" class="form-label fw-semibold text-secondary small">Серия
-                        оборудования</label>
+                    <label asp-for="SelectedNormativeSetId"
+                           class="form-label">
+                        Нормативный сборник
+                    </label>
+
+                    <select asp-for="SelectedNormativeSetId"
+                            asp-items="Model.NormativeSetOptions"
+                            class="form-select">
+
+                        <option value="">
+                            -- Выберите нормативный сборник --
+                        </option>
+                    </select>
+
+                    <span asp-validation-for="SelectedNormativeSetId"
+                          class="text-danger">
+                    </span>
+                </div>
+
+                <!-- 3. Выбор серии  -->
+                <div class="mb-3">
+                    <label asp-for="SelectedSeriesId"
+                           class="form-label fw-semibold text-secondary small">
+                        Серия оборудования
+                    </label>
+
                     <select asp-for="SelectedSeriesId" asp-items="Model.SeriesOptions"
                             class="form-select form-select-sm border-secondary-subtle">
-                        <option value="">-- Выберите серию из реестра --</option>
+                        <option value="">
+                            -- Выберите серию из реестра --
+                        </option>
                     </select>
                     <span asp-validation-for="SelectedSeriesId" class="text-danger small d-block mt-1"></span>
                 </div>
@@ -157,6 +193,9 @@
 
                     <input type="hidden" asp-for="TotalSumHour"/>
                     <input type="hidden" asp-for="TotalSumCostHour"/>
+
+                    <input type="hidden"
+                           asp-for="SelectedNormativeSetId"/>
                     <div class="d-grid mt-3">
 
                         <button type="submit" class="btn btn-sm btn-success text-uppercase py-2 fw-bold"
@@ -238,6 +277,518 @@
 <!-- 2. Выбор серии
 <div class="mb-3">
     
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -6,12 +6,10 @@ using WebAppEstimate.Areas.SiteAdam.Services;
 
 namespace WebAppEstimate.Areas.SiteAdam.Controllers;
 
-
-
 /// <summary>
-/// Контроллер истории расчётов центробежных насосов.
-/// Отвечает за сохранение, просмотр и удаление
-/// результатов выполненных расчётов.
+///     Контроллер истории расчётов центробежных насосов.
+///     Отвечает за сохранение, просмотр и удаление
+///     результатов выполненных расчётов.
 /// </summary>
 [Area("SiteAdam")]
 [Authorize(Roles = "Admin,Adam")]
@@ -21,14 +19,14 @@ public class CentrifugalPumpHistoryController : Controller
     private readonly ICentrifugalPumpService _pumpService;
 
     /// <summary>
-    /// Создаёт контроллер истории расчётов центробежных насосов.
+    ///     Создаёт контроллер истории расчётов центробежных насосов.
     /// </summary>
     /// <param name="historyService">
-    /// Сервис работы с историей расчётов.
+    ///     Сервис работы с историей расчётов.
     /// </param>
     /// <param name="pumpService">
-    /// Сервис центробежных насосов,
-    /// используемый для повторного получения списка серий.
+    ///     Сервис центробежных насосов,
+    ///     используемый для повторного получения списка серий.
     /// </param>
     public CentrifugalPumpHistoryController(
         ICentrifugalPumpHistoryService historyService,
@@ -39,10 +37,10 @@ public class CentrifugalPumpHistoryController : Controller
     }
 
     /// <summary>
-    /// Сохраняет выполненный расчёт в историю базы данных.
+    ///     Сохраняет выполненный расчёт в историю базы данных.
     /// </summary>
     /// <param name="model">
-    /// Модель с параметрами и результатами расчёта.
+    ///     Модель с параметрами и результатами расчёта.
     /// </param>
     [HttpPost]
     public async Task<IActionResult> Save(
@@ -62,6 +60,10 @@ public class CentrifugalPumpHistoryController : Controller
             await _pumpService.GetSeriesOptionsAsync()
             ?? new List<SelectListItem>();
 
+        model.NormativeSetOptions =
+            await _pumpService.GetNormativeSetOptionsAsync()
+            ?? new List<SelectListItem>();
+
         // Сохраняем состояние рассчитанной модели,
         // чтобы результат продолжал отображаться в форме.
         model.IsCalculated = true;
@@ -72,10 +74,10 @@ public class CentrifugalPumpHistoryController : Controller
     }
 
     /// <summary>
-    /// Удаляет одну запись истории расчёта.
+    ///     Удаляет одну запись истории расчёта.
     /// </summary>
     /// <param name="id">
-    /// Идентификатор удаляемой записи.
+    ///     Идентификатор удаляемой записи.
     /// </param>
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -90,7 +92,7 @@ public class CentrifugalPumpHistoryController : Controller
     }
 
     /// <summary>
-    /// Полностью очищает историю расчётов.
+    ///     Полностью очищает историю расчётов.
     /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -105,7 +107,7 @@ public class CentrifugalPumpHistoryController : Controller
     }
 
     /// <summary>
-    /// Отображает историю сохранённых расчётов.
+    ///     Отображает историю сохранённых расчётов.
     /// </summary>
     [HttpGet]
     public async Task<IActionResult> Index()
@@ -116,14 +118,3 @@ public class CentrifugalPumpHistoryController : Controller
         return View(histories);
     }
 }
-
-
-
-
-
-
-
-
-
-
-

@@ -5,15 +5,10 @@ using WebAppEstimate.Areas.SiteAdam.Models;
 
 namespace WebAppEstimate.Areas.SiteAdam.Services;
 
-
-
-
-
-
 /// <summary>
-/// Сервис работы с историей расчётов центробежных насосов.
-/// Отвечает за сохранение, получение и удаление
-/// результатов расчётов из базы данных.
+///     Сервис работы с историей расчётов центробежных насосов.
+///     Отвечает за сохранение, получение и удаление
+///     результатов расчётов из базы данных.
 /// </summary>
 public class CentrifugalPumpHistoryService
     : ICentrifugalPumpHistoryService
@@ -21,10 +16,10 @@ public class CentrifugalPumpHistoryService
     private readonly AppDbContextCentrifugalPump _dbcontext;
 
     /// <summary>
-    /// Создаёт сервис истории расчётов центробежных насосов.
+    ///     Создаёт сервис истории расчётов центробежных насосов.
     /// </summary>
     /// <param name="dbcontext">
-    /// Контекст базы данных SiteAdam.
+    ///     Контекст базы данных SiteAdam.
     /// </param>
     public CentrifugalPumpHistoryService(
         AppDbContextCentrifugalPump dbcontext)
@@ -33,16 +28,21 @@ public class CentrifugalPumpHistoryService
     }
 
     /// <summary>
-    /// Сохраняет результат расчёта центробежного насоса
-    /// в историю базы данных.
+    ///     Сохраняет результат расчёта центробежного насоса
+    ///     в историю базы данных.
     /// </summary>
     /// <param name="model">
-    /// Модель с исходными параметрами
-    /// и результатами выполненного расчёта.
+    ///     Модель с исходными параметрами
+    ///     и результатами выполненного расчёта.
     /// </param>
     public async Task SaveAsync(
         CentrifugalPumpModel model)
     {
+        var normativeSet =
+            await _dbcontext.PumpNormativeSets
+                .FirstOrDefaultAsync(x =>
+                    x.Id == model.SelectedNormativeSetId);
+
         // Формируем отдельную сущность истории
         // на основе текущего состояния расчётной модели.
         var history =
@@ -51,19 +51,22 @@ public class CentrifugalPumpHistoryService
                 Name = model.Name,
                 SelectedSeriesId = model.SelectedSeriesId,
 
-                Impeller = model.Impeller,
-                Weight = model.Weight,
-                Volume = model.Volume,
-
                 Number = model.Number,
-
                 CostHour = model.CostHour,
 
                 TotalSumHour = model.TotalSumHour,
                 TotalSumCostHour = model.TotalSumCostHour,
 
                 // Сохраняем время создания записи в UTC.
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+
+                PumpNormativeSetId = model.SelectedNormativeSetId,
+                NormativeSetName =
+                    normativeSet?.Name ?? "",
+
+                Impeller = model.Impeller,
+                Weight = model.Weight,
+                Volume = model.Volume
             };
 
         _dbcontext.PumpCentrifugalHistories
@@ -73,26 +76,25 @@ public class CentrifugalPumpHistoryService
     }
 
     /// <summary>
-    /// Получает всю историю расчётов центробежных насосов.
+    ///     Получает всю историю расчётов центробежных насосов.
     /// </summary>
     /// <returns>
-    /// Список расчётов, отсортированный
-    /// от самых новых записей к более старым.
+    ///     Список расчётов, отсортированный
+    ///     от самых новых записей к более старым.
     /// </returns>
     public async Task<List<PumpCentrifugalHistory>> GetAllAsync()
     {
         return await _dbcontext
             .PumpCentrifugalHistories
-            .OrderByDescending(
-                h => h.CreatedAt)
+            .OrderByDescending(h => h.CreatedAt)
             .ToListAsync();
     }
 
     /// <summary>
-    /// Удаляет одну запись истории по её идентификатору.
+    ///     Удаляет одну запись истории по её идентификатору.
     /// </summary>
     /// <param name="id">
-    /// Идентификатор удаляемой записи.
+    ///     Идентификатор удаляемой записи.
     /// </param>
     public async Task DeleteAsync(int id)
     {
@@ -115,8 +117,8 @@ public class CentrifugalPumpHistoryService
     }
 
     /// <summary>
-    /// Удаляет все записи истории расчётов
-    /// центробежных насосов.
+    ///     Удаляет все записи истории расчётов
+    ///     центробежных насосов.
     /// </summary>
     public async Task DeleteAllAsync()
     {
@@ -134,10 +136,3 @@ public class CentrifugalPumpHistoryService
         await _dbcontext.SaveChangesAsync();
     }
 }
-
-
-
-
-
-
-

@@ -59,6 +59,10 @@ public class CentrifugalPumpController : Controller
             {
                 SeriesOptions =
                     await _pumpService.GetSeriesOptionsAsync()
+                    ?? new List<SelectListItem>(),
+                
+                NormativeSetOptions =
+                    await _pumpService.GetNormativeSetOptionsAsync()
                     ?? new List<SelectListItem>()
             };
 
@@ -101,6 +105,10 @@ public class CentrifugalPumpController : Controller
             model.SeriesOptions =
                 await _pumpService.GetSeriesOptionsAsync()
                 ?? new List<SelectListItem>();
+            
+            model.NormativeSetOptions =
+                await _pumpService.GetNormativeSetOptionsAsync()
+                ?? new List<SelectListItem>();
 
             return View(
                 "CentrifugalPumpForm",
@@ -117,6 +125,10 @@ public class CentrifugalPumpController : Controller
         // для корректного отображения формы после расчёта.
         model.SeriesOptions =
             await _pumpService.GetSeriesOptionsAsync()
+            ?? new List<SelectListItem>();
+        
+        model.NormativeSetOptions =
+            await _pumpService.GetNormativeSetOptionsAsync()
             ?? new List<SelectListItem>();
 
         return View(

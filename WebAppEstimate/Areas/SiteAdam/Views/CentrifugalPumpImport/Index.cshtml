@@ -1,0 +1,118 @@
+
+@{
+    ViewData["Title"] = "Загрузка нормативов";
+}
+
+<h2>Загрузка нормативного Excel-справочника</h2>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+<form asp-area="SiteAdam"
+      asp-controller="CentrifugalPumpImport"
+      asp-action="Upload"
+      method="post"
+      enctype="multipart/form-data">
+
+    @Html.AntiForgeryToken()
+    
+    <div class="mb-3">
+        <a asp-area="SiteAdam"
+           asp-controller="CentrifugalPump"
+           asp-action="Calculate"
+           class="btn btn-outline-secondary">
+            ← Вернуться к расчёту
+        </a>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">
+            Название нормативного набора
+        </label>
+
+        <input type="text"
+               name="dataSetName"
+               class="form-control"
+               placeholder="Например: Норматив A"
+               required />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">
+            Excel-файл
+        </label>
+
+        <input type="file"
+               name="file"
+               class="form-control"
+               accept=".xlsx,.xls"
+               required />
+    </div>
+
+    <button type="submit"
+            class="btn btn-primary">
+        Загрузить в БД
+    </button>
+</form>
+<hr />
+
+<h3>Загрузка файла из папки сервера</h3>
+
+<form asp-area="SiteAdam"
+      asp-controller="CentrifugalPumpImport"
+      asp-action="UploadFromServer"
+      method="post">
+
+    @Html.AntiForgeryToken()
+
+    <div class="mb-3">
+        <label class="form-label">
+            Название нормативного набора
+        </label>
+
+        <input type="text"
+               name="dataSetName"
+               class="form-control"
+               placeholder="Например: Норматив A"
+               required />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">
+            Excel-файл из папки сервера
+        </label>
+
+        <select name="fileName"
+                class="form-select"
+                required>
+
+            <option value="">
+                -- Выберите справочник --
+            </option>
+
+            @foreach (var file in ViewBag.ExcelFiles)
+            {
+                <option value="@file">
+                    @file
+                </option>
+            }
+        </select>
+    </div>
+
+    <button type="submit"
+            class="btn btn-success">
+        Загрузить выбранный файл в БД
+    </button>
+</form>
+

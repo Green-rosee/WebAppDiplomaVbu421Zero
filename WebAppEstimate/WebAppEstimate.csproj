@@ -10,6 +10,7 @@
         <PackageReference Include="BlazorDatasheet" Version="0.17.2"/>
         <PackageReference Include="Bogus" Version="35.6.5"/>
         <PackageReference Include="ClosedXML" Version="0.105.1"/>
+        <PackageReference Include="ExcelDataReader" Version="3.9.0"/>
         <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1"/>
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.11"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.10"/>
@@ -27,6 +28,7 @@
         <Folder Include="Areas\SiteAdam\Components\Layout\"/>
         <Folder Include="Areas\SiteAdam\Data\Entity\Pumps\CentrifugalPumpsHistory\"/>
         <Folder Include="Areas\SiteAdam\Views\CentrifugalPumpHistory\"/>
+        <Folder Include="Areas\SiteAdam\Views\CentrifugalPumpImport\" />
         <Folder Include="Areas\SiteAdam\Views\CentrifugalPump\"/>
         <Folder Include="Areas\SiteAdam\Views\Home\"/>
         <Folder Include="Areas\SiteBram\Controllers\"/>
@@ -35,6 +37,7 @@
         <Folder Include="Areas\SiteCerber\Data\"/>
         <Folder Include="Areas\SiteCerber\Templates\"/>
         <Folder Include="Areas\SiteCerber\Views\Home\"/>
+        <Folder Include="ExcelFilesPageLoad\CentrPumps\"/>
         <Folder Include="ExcelFilesPageSave\CentrPumps\"/>
         <Folder Include="ExcelFilesPageSave\ContractsCentrPumps\"/>
         <Folder Include="ExcelFilesPageSave\WinchAnchor\"/>
@@ -56,6 +59,13 @@
         <_ContentIncludedByDefault Remove="Areas\SiteAdam\Views\Login\Login.cshtml"/>
     </ItemGroup>
 
+    <ItemGroup>
+        <Content Include="ExcelFilesPageLoad\CentrPumps\**\*">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+        </Content>
+    </ItemGroup>
+    
     <ItemGroup>
         <Content Include="Database\*.sqlite">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

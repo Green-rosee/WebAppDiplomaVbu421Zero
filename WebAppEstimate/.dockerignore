@@ -1,0 +1,11 @@
+bin/
+obj/
+publish-test/
+**/publish-test/
+.git/
+.idea/
+.env
+*.sqlite
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm

@@ -9,6 +9,10 @@ public class PumpCentrifugalHistory
     // Введенные пользователем данные
     public string Name { get; set; } = string.Empty;
     public int SelectedSeriesId { get; set; }
+
+    public int PumpNormativeSetId { get; set; }
+    public string NormativeSetName { get; set; } = "";
+
     public int Impeller { get; set; }
     public int Weight { get; set; }
     public int Volume { get; set; }

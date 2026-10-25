@@ -40,4 +40,11 @@ public class CentrifugalPumpModel
 
     // Сюда мы будем загружать список серий динамически из вашей базы данных
     public List<SelectListItem> SeriesOptions { get; set; } = new();
+    
+    
+    //Да. Теперь связываем форму расчёта с PumpNormativeSets
+    public int SelectedNormativeSetId { get; set; }
+
+    public List<SelectListItem> NormativeSetOptions { get; set; }
+        = new();
 }

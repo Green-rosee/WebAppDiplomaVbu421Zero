@@ -11,6 +11,9 @@ using WebAppEstimate.Pipeline.PipelineBuilder;
 // Через него настраиваются конфигурация, DI-контейнер и сервисы.
 var builder = WebApplication.CreateBuilder(args);
 
+System.Text.Encoding.RegisterProvider(
+    System.Text.CodePagesEncodingProvider.Instance);
+
 // Регистрируем контексты баз данных.
 // В зависимости от конфигурации используются SQLite или PostgreSQL.
 builder.Services.AddApplicationDatabases(
