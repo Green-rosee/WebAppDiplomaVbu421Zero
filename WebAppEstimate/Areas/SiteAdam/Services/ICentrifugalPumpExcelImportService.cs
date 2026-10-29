@@ -1,27 +1,33 @@
-
 namespace WebAppEstimate.Areas.SiteAdam.Services.ExcelPumps;
 
 /// <summary>
-/// Интерфейс сервиса импорта нормативных данных
-/// центробежных насосов из Excel-файла.
+///     Интерфейс сервиса импорта нормативных данных
+///     центробежных насосов из Excel-файлов.
+///     Определяет контракт для чтения Excel-файла
+///     и сохранения нормативного набора в базу данных.
 /// </summary>
 public interface ICentrifugalPumpExcelImportService
 {
     /// <summary>
-    /// Импортирует нормативные данные из Excel-файла
-    /// в базу данных.
+    ///     Импортирует нормативные данные
+    ///     из Excel-файла в базу данных.
     /// </summary>
     /// <param name="stream">
-    /// Поток загруженного Excel-файла.
+    ///     Поток с содержимым Excel-файла.
     /// </param>
     /// <param name="dataSetName">
-    /// Название нормативного набора, например A, B или C.
+    ///     Название нормативного набора,
+    ///     указанное пользователем.
     /// </param>
     /// <param name="fileName">
-    /// Исходное имя загруженного Excel-файла.
+    ///     Исходное имя Excel-файла.
     /// </param>
+    /// <returns>
+    ///     Асинхронная операция импорта данных.
+    /// </returns>
     Task ImportAsync(
         Stream stream,
         string dataSetName,
         string fileName);
 }
+

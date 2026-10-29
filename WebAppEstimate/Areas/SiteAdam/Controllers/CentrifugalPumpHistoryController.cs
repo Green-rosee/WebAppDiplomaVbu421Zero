@@ -8,8 +8,10 @@ namespace WebAppEstimate.Areas.SiteAdam.Controllers;
 
 /// <summary>
 ///     Контроллер истории расчётов центробежных насосов.
-///     Отвечает за сохранение, просмотр и удаление
-///     результатов выполненных расчётов.
+///     Отвечает за сохранение выполненных расчётов,
+///     просмотр истории,
+///     удаление отдельных записей
+///     и полную очистку истории.
 /// </summary>
 [Area("SiteAdam")]
 [Authorize(Roles = "Admin,Adam")]
@@ -19,14 +21,16 @@ public class CentrifugalPumpHistoryController : Controller
     private readonly ICentrifugalPumpService _pumpService;
 
     /// <summary>
-    ///     Создаёт контроллер истории расчётов центробежных насосов.
+    ///     Создаёт контроллер истории расчётов
+    ///     центробежных насосов.
     /// </summary>
     /// <param name="historyService">
     ///     Сервис работы с историей расчётов.
     /// </param>
     /// <param name="pumpService">
     ///     Сервис центробежных насосов,
-    ///     используемый для повторного получения списка серий.
+    ///     используемый для повторной загрузки
+    ///     списков серий и нормативных наборов.
     /// </param>
     public CentrifugalPumpHistoryController(
         ICentrifugalPumpHistoryService historyService,
@@ -37,16 +41,28 @@ public class CentrifugalPumpHistoryController : Controller
     }
 
     /// <summary>
-    ///     Сохраняет выполненный расчёт в историю базы данных.
+    ///     Сохраняет выполненный расчёт
+    ///     центробежного насоса в историю базы данных.
+    ///     После сохранения повторно загружает
+    ///     списки серий и нормативных наборов,
+    ///     чтобы форма расчёта продолжала
+    ///     корректно отображаться.
     /// </summary>
     /// <param name="model">
-    ///     Модель с параметрами и результатами расчёта.
+    ///     Модель с исходными параметрами
+    ///     и результатами выполненного расчёта.
     /// </param>
+    /// <returns>
+    ///     Представление формы расчёта
+    ///     с сохранённым состоянием результата.
+    /// </returns>
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Save(
         CentrifugalPumpModel model)
     {
-        // Сохраняем текущий расчёт через сервис истории.
+        // Сохраняем текущий расчёт
+        // через сервис истории.
         await _historyService.SaveAsync(model);
 
         // Передаём сообщение пользователю
@@ -54,8 +70,9 @@ public class CentrifugalPumpHistoryController : Controller
         TempData["SuccessMessage"] =
             "Калькуляция сохранена в базе данных.";
 
-        // Повторно загружаем список серий,
-        // так как он не передаётся обратно из HTML-формы.
+        // Выпадающие списки не передаются
+        // обратно из HTML-формы автоматически,
+        // поэтому загружаем их повторно.
         model.SeriesOptions =
             await _pumpService.GetSeriesOptionsAsync()
             ?? new List<SelectListItem>();
@@ -65,7 +82,8 @@ public class CentrifugalPumpHistoryController : Controller
             ?? new List<SelectListItem>();
 
         // Сохраняем состояние рассчитанной модели,
-        // чтобы результат продолжал отображаться в форме.
+        // чтобы результат продолжал отображаться
+        // после сохранения в историю.
         model.IsCalculated = true;
 
         return View(
@@ -74,26 +92,36 @@ public class CentrifugalPumpHistoryController : Controller
     }
 
     /// <summary>
-    ///     Удаляет одну запись истории расчёта.
+    ///     Удаляет одну запись
+    ///     из истории расчётов.
     /// </summary>
     /// <param name="id">
     ///     Идентификатор удаляемой записи.
     /// </param>
+    /// <returns>
+    ///     Перенаправление на страницу истории.
+    /// </returns>
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Delete(int id)
+    public async Task<IActionResult> Delete(
+        int id)
     {
         await _historyService.DeleteAsync(id);
 
         TempData["SuccessMessage"] =
-            "Расчет успешно удален.";
+            "Расчёт успешно удалён.";
 
-        return RedirectToAction(nameof(Index));
+        return RedirectToAction(
+            nameof(Index));
     }
 
     /// <summary>
-    ///     Полностью очищает историю расчётов.
+    ///     Полностью очищает историю
+    ///     расчётов центробежных насосов.
     /// </summary>
+    /// <returns>
+    ///     Перенаправление на страницу истории.
+    /// </returns>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteAll()
@@ -101,14 +129,23 @@ public class CentrifugalPumpHistoryController : Controller
         await _historyService.DeleteAllAsync();
 
         TempData["SuccessMessage"] =
-            "История расчетов полностью удалена.";
+            "История расчётов полностью удалена.";
 
-        return RedirectToAction(nameof(Index));
+        return RedirectToAction(
+            nameof(Index));
     }
 
     /// <summary>
-    ///     Отображает историю сохранённых расчётов.
+    ///     Отображает историю сохранённых расчётов
+    ///     центробежных насосов.
+    ///     История также позволяет визуально сравнивать
+    ///     результаты, выполненные по разным
+    ///     нормативным наборам.
     /// </summary>
+    /// <returns>
+    ///     Представление со списком
+    ///     сохранённых расчётов.
+    /// </returns>
     [HttpGet]
     public async Task<IActionResult> Index()
     {
@@ -118,3 +155,4 @@ public class CentrifugalPumpHistoryController : Controller
         return View(histories);
     }
 }
+

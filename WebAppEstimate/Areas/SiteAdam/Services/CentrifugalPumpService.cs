@@ -5,22 +5,23 @@ using WebAppEstimate.Areas.SiteAdam.Models;
 
 namespace WebAppEstimate.Areas.SiteAdam.Services;
 
-
-
 /// <summary>
-/// Сервис расчёта параметров центробежного насоса.
-/// Получает исходные данные из базы и рассчитывает
-/// трудоёмкость и стоимость изготовления.
+///     Сервис расчёта параметров центробежного насоса.
+///     Получает нормативные данные из базы,
+///     подбирает ближайшие значения для выбранной серии
+///     и нормативного набора,
+///     после чего рассчитывает трудоёмкость
+///     и общую стоимость изготовления.
 /// </summary>
 public class CentrifugalPumpService : ICentrifugalPumpService
 {
     private readonly AppDbContextCentrifugalPump _dbContext;
 
     /// <summary>
-    /// Создаёт сервис расчёта центробежного насоса.
+    ///     Создаёт сервис расчёта центробежного насоса.
     /// </summary>
     /// <param name="dbContext">
-    /// Контекст базы данных SiteAdam.
+    ///     Контекст базы данных SiteAdam.
     /// </param>
     public CentrifugalPumpService(
         AppDbContextCentrifugalPump dbContext)
@@ -29,14 +30,15 @@ public class CentrifugalPumpService : ICentrifugalPumpService
     }
 
     /// <summary>
-    /// Получает список доступных серий насосов
-    /// для отображения в выпадающем списке интерфейса.
+    ///     Получает список доступных серий насосов
+    ///     для отображения в выпадающем списке интерфейса.
     /// </summary>
     /// <returns>
-    /// Список элементов <see cref="SelectListItem"/>
-    /// с идентификаторами и названиями серий.
+    ///     Список элементов <see cref="SelectListItem" />
+    ///     с идентификаторами и названиями серий насосов.
     /// </returns>
-    public async Task<List<SelectListItem>> GetSeriesOptionsAsync()
+    public async Task<List<SelectListItem>>
+        GetSeriesOptionsAsync()
     {
         return await _dbContext.PumpSeries
             .Select(s => new SelectListItem
@@ -48,58 +50,81 @@ public class CentrifugalPumpService : ICentrifugalPumpService
     }
 
     /// <summary>
-    /// Выполняет расчёт трудоёмкости и стоимости изготовления
-    /// центробежных насосов на основе ближайших параметров из базы данных.
+    ///     Выполняет расчёт трудоёмкости
+    ///     и общей стоимости изготовления насосов.
+    ///     Для каждого введённого параметра
+    ///     подбирается ближайшее нормативное значение
+    ///     в рамках выбранной серии насоса
+    ///     и выбранного нормативного набора.
     /// </summary>
     /// <param name="model">
-    /// Модель с выбранной серией и параметрами насоса.
+    ///     Модель с выбранной серией,
+    ///     нормативным набором,
+    ///     параметрами насоса,
+    ///     количеством изделий
+    ///     и стоимостью одного часа работ.
     /// </param>
     /// <returns>
-    /// Обновлённая модель с рассчитанными значениями
-    /// трудоёмкости и стоимости.
+    ///     Обновлённая модель
+    ///     с рассчитанной трудоёмкостью,
+    ///     общей трудоёмкостью
+    ///     и итоговой стоимостью.
     /// </returns>
-    public async Task<CentrifugalPumpModel> CalculateClosestHoursAsync(
-        CentrifugalPumpModel model)
+    public async Task<CentrifugalPumpModel>
+        CalculateClosestHoursAsync(
+            CentrifugalPumpModel model)
     {
-        // Ищем ближайшее значение рабочего колеса
-        // для выбранной серии насоса.
-        
+        // Ищем ближайшее нормативное значение
+        // диаметра рабочего колеса
+        // для выбранной серии и нормативного набора.
         var closestImpeller =
             await _dbContext.PumpImpellers
                 .Where(i =>
-                    i.PumpSeriesId == model.SelectedSeriesId &&
-                    i.PumpNormativeSetId == model.SelectedNormativeSetId)
+                    i.PumpSeriesId ==
+                    model.SelectedSeriesId &&
+                    i.PumpNormativeSetId ==
+                    model.SelectedNormativeSetId)
                 .OrderBy(i =>
-                    Math.Abs(i.Impeller - model.Impeller))
+                    Math.Abs(
+                        i.Impeller -
+                        model.Impeller))
                 .FirstOrDefaultAsync();
 
-        // Ищем ближайшее значение массы
-        // для выбранной серии насоса.
-        
+        // Ищем ближайшее нормативное значение массы
+        // для выбранной серии и нормативного набора.
         var closestWeight =
             await _dbContext.PumpWeights
                 .Where(w =>
-                    w.PumpSeriesId == model.SelectedSeriesId &&
-                    w.PumpNormativeSetId == model.SelectedNormativeSetId)
+                    w.PumpSeriesId ==
+                    model.SelectedSeriesId &&
+                    w.PumpNormativeSetId ==
+                    model.SelectedNormativeSetId)
                 .OrderBy(w =>
-                    Math.Abs(w.Weight - model.Weight))
+                    Math.Abs(
+                        w.Weight -
+                        model.Weight))
                 .FirstOrDefaultAsync();
 
-        // Ищем ближайшее значение объёма
-        // для выбранной серии насоса.
-        
+        // Ищем ближайшее нормативное значение
+        // производительности насоса
+        // для выбранной серии и нормативного набора.
         var closestVolume =
             await _dbContext.PumpVolumes
                 .Where(v =>
-                    v.PumpSeriesId == model.SelectedSeriesId &&
-                    v.PumpNormativeSetId == model.SelectedNormativeSetId)
+                    v.PumpSeriesId ==
+                    model.SelectedSeriesId &&
+                    v.PumpNormativeSetId ==
+                    model.SelectedNormativeSetId)
                 .OrderBy(v =>
-                    Math.Abs(v.Volume - model.Volume))
+                    Math.Abs(
+                        v.Volume -
+                        model.Volume))
                 .FirstOrDefaultAsync();
 
-        // Сохраняем трудоёмкость каждой найденной операции.
-        // Если подходящее значение отсутствует,
-        // используется нулевое значение.
+        // Получаем трудоёмкость
+        // для каждого найденного параметра.
+        // Если нормативное значение отсутствует,
+        // используется значение 0.
         model.HourImpeller =
             closestImpeller?.Hour ?? 0;
 
@@ -109,8 +134,8 @@ public class CentrifugalPumpService : ICentrifugalPumpService
         model.HourVolume =
             closestVolume?.Hour ?? 0;
 
-        // Рассчитываем трудоёмкость изготовления
-        // одного насоса.
+        // Рассчитываем суммарную трудоёмкость
+        // изготовления одного насоса.
         var singlePumpSum =
             model.HourImpeller +
             model.HourWeight +
@@ -120,11 +145,15 @@ public class CentrifugalPumpService : ICentrifugalPumpService
         // для заданного количества насосов.
         model.TotalSumHour =
             Math.Round(
-                singlePumpSum * model.Number,
+                singlePumpSum *
+                model.Number,
                 2);
 
         // Рассчитываем общую стоимость изготовления:
-        // трудоёмкость одного насоса × количество × стоимость часа.
+        //
+        // трудоёмкость одного насоса
+        // × количество насосов
+        // × стоимость одного часа работ.
         model.TotalSumCostHour =
             Math.Round(
                 (decimal)singlePumpSum *
@@ -132,17 +161,24 @@ public class CentrifugalPumpService : ICentrifugalPumpService
                 model.CostHour,
                 2);
 
-        // Указываем интерфейсу, что расчёт выполнен
-        // и результат можно отображать пользователю.
+        // Сообщаем интерфейсу,
+        // что расчёт успешно выполнен
+        // и результаты можно отображать пользователю.
         model.IsCalculated = true;
 
         return model;
     }
-    
+
     /// <summary>
-    /// Получает список загруженных нормативных наборов
-    /// для выбора на странице расчёта.
+    ///     Получает список загруженных нормативных наборов
+    ///     для отображения в выпадающем списке
+    ///     на странице расчёта.
     /// </summary>
+    /// <returns>
+    ///     Список нормативных наборов,
+    ///     содержащий их идентификаторы,
+    ///     названия и имена исходных Excel-файлов.
+    /// </returns>
     public async Task<List<SelectListItem>>
         GetNormativeSetOptionsAsync()
     {
@@ -156,16 +192,4 @@ public class CentrifugalPumpService : ICentrifugalPumpService
             .ToListAsync();
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
 

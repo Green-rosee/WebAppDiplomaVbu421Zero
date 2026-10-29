@@ -7,8 +7,9 @@ namespace WebAppEstimate.Areas.SiteAdam.Services;
 
 /// <summary>
 ///     Сервис работы с историей расчётов центробежных насосов.
-///     Отвечает за сохранение, получение и удаление
-///     результатов расчётов из базы данных.
+///     Отвечает за сохранение результатов расчётов,
+///     получение истории из базы данных
+///     и удаление отдельных или всех записей.
 /// </summary>
 public class CentrifugalPumpHistoryService
     : ICentrifugalPumpHistoryService
@@ -16,7 +17,8 @@ public class CentrifugalPumpHistoryService
     private readonly AppDbContextCentrifugalPump _dbcontext;
 
     /// <summary>
-    ///     Создаёт сервис истории расчётов центробежных насосов.
+    ///     Создаёт сервис истории расчётов
+    ///     центробежных насосов.
     /// </summary>
     /// <param name="dbcontext">
     ///     Контекст базы данных SiteAdam.
@@ -28,8 +30,12 @@ public class CentrifugalPumpHistoryService
     }
 
     /// <summary>
-    ///     Сохраняет результат расчёта центробежного насоса
-    ///     в историю базы данных.
+    ///     Сохраняет результат выполненного расчёта
+    ///     центробежного насоса в историю базы данных.
+    ///     Вместе с параметрами расчёта сохраняется
+    ///     выбранный нормативный набор,
+    ///     чтобы в дальнейшем можно было сравнивать
+    ///     результаты, полученные по разным нормативам.
     /// </summary>
     /// <param name="model">
     ///     Модель с исходными параметрами
@@ -38,67 +44,96 @@ public class CentrifugalPumpHistoryService
     public async Task SaveAsync(
         CentrifugalPumpModel model)
     {
+        // Получаем выбранный нормативный набор,
+        // чтобы сохранить его название вместе с историей расчёта.
         var normativeSet =
             await _dbcontext.PumpNormativeSets
                 .FirstOrDefaultAsync(x =>
-                    x.Id == model.SelectedNormativeSetId);
+                    x.Id ==
+                    model.SelectedNormativeSetId);
 
         // Формируем отдельную сущность истории
         // на основе текущего состояния расчётной модели.
         var history =
             new PumpCentrifugalHistory
             {
-                Name = model.Name,
-                SelectedSeriesId = model.SelectedSeriesId,
+                Name =
+                    model.Name,
 
-                Number = model.Number,
-                CostHour = model.CostHour,
+                SelectedSeriesId =
+                    model.SelectedSeriesId,
 
-                TotalSumHour = model.TotalSumHour,
-                TotalSumCostHour = model.TotalSumCostHour,
+                Number =
+                    model.Number,
+
+                CostHour =
+                    model.CostHour,
+
+                TotalSumHour =
+                    model.TotalSumHour,
+
+                TotalSumCostHour =
+                    model.TotalSumCostHour,
 
                 // Сохраняем время создания записи в UTC.
-                CreatedAt = DateTime.UtcNow,
+                CreatedAt =
+                    DateTime.UtcNow,
 
-                PumpNormativeSetId = model.SelectedNormativeSetId,
+                PumpNormativeSetId =
+                    model.SelectedNormativeSetId,
+
                 NormativeSetName =
                     normativeSet?.Name ?? "",
 
-                Impeller = model.Impeller,
-                Weight = model.Weight,
-                Volume = model.Volume
+                Impeller =
+                    model.Impeller,
+
+                Weight =
+                    model.Weight,
+
+                Volume =
+                    model.Volume
             };
 
-        _dbcontext.PumpCentrifugalHistories
+        _dbcontext
+            .PumpCentrifugalHistories
             .Add(history);
 
-        await _dbcontext.SaveChangesAsync();
+        await _dbcontext
+            .SaveChangesAsync();
     }
 
     /// <summary>
-    ///     Получает всю историю расчётов центробежных насосов.
+    ///     Получает всю историю расчётов
+    ///     центробежных насосов.
     /// </summary>
     /// <returns>
-    ///     Список расчётов, отсортированный
-    ///     от самых новых записей к более старым.
+    ///     Список сохранённых расчётов,
+    ///     отсортированный от самых новых записей
+    ///     к более старым.
     /// </returns>
-    public async Task<List<PumpCentrifugalHistory>> GetAllAsync()
+    public async Task<List<PumpCentrifugalHistory>>
+        GetAllAsync()
     {
         return await _dbcontext
             .PumpCentrifugalHistories
-            .OrderByDescending(h => h.CreatedAt)
+            .OrderByDescending(h =>
+                h.CreatedAt)
             .ToListAsync();
     }
 
     /// <summary>
-    ///     Удаляет одну запись истории по её идентификатору.
+    ///     Удаляет одну запись истории
+    ///     по её идентификатору.
     /// </summary>
     /// <param name="id">
     ///     Идентификатор удаляемой записи.
     /// </param>
-    public async Task DeleteAsync(int id)
+    public async Task DeleteAsync(
+        int id)
     {
-        // Ищем запись по первичному ключу.
+        // Ищем запись истории
+        // по первичному ключу.
         var item =
             await _dbcontext
                 .PumpCentrifugalHistories
@@ -106,14 +141,14 @@ public class CentrifugalPumpHistoryService
 
         // Если запись не найдена,
         // дополнительная обработка не требуется.
-        if (item == null)
-            return;
+        if (item == null) return;
 
         _dbcontext
             .PumpCentrifugalHistories
             .Remove(item);
 
-        await _dbcontext.SaveChangesAsync();
+        await _dbcontext
+            .SaveChangesAsync();
     }
 
     /// <summary>
@@ -128,11 +163,14 @@ public class CentrifugalPumpHistoryService
                 .PumpCentrifugalHistories
                 .ToListAsync();
 
-        // Помечаем все записи на удаление.
+        // Помечаем все полученные записи
+        // на удаление.
         _dbcontext
             .PumpCentrifugalHistories
             .RemoveRange(items);
 
-        await _dbcontext.SaveChangesAsync();
+        await _dbcontext
+            .SaveChangesAsync();
     }
 }
+
