@@ -1,83 +1,183 @@
-# SiteAdam — UML для презентации
-
-```mermaid
 classDiagram
 direction LR
 
-class CentrifugalPumpPage {
-    <<Blazor UI>>
-    +CalculateAsync()
-    +SaveAsync()
+class CentrifugalPumpController {
+    <<MVC Controller>>
+    +Index()
+    +Calculate()
+    +Calculate(model)
 }
 
 class CentrifugalPumpModel {
     <<Model>>
     +Name
-    +Quantity
+    +SelectedSeriesId
+    +SelectedNormativeSetId
     +Impeller
     +Volume
     +Weight
+    +Number
     +CostHour
-    +TotalHours
-    +TotalCost
+    +HourImpeller
+    +HourVolume
+    +HourWeight
+    +TotalSumHour
+    +TotalSumCostHour
+    +IsCalculated
 }
 
 class CentrifugalPumpService {
-    <<Calculation>>
+    <<Calculation Service>>
     +GetSeriesOptionsAsync()
-    +CalculateAsync()
+    +GetNormativeSetOptionsAsync()
+    +CalculateClosestHoursAsync()
+}
+
+class CentrifugalPumpHistoryController {
+    <<MVC Controller>>
+    +Save()
+    +Index()
+    +Delete()
+    +DeleteAll()
 }
 
 class CentrifugalPumpHistoryService {
-    <<History>>
+    <<History Service>>
     +GetAllAsync()
     +SaveAsync()
+    +DeleteAsync()
+    +DeleteAllAsync()
+}
+
+class CentrifugalPumpImportController {
+    <<MVC Controller>>
+    +Index()
+    +Upload()
+    +UploadFromServer()
+}
+
+class CentrifugalPumpExcelImportService {
+    <<Import Service>>
+    +ImportAsync()
 }
 
 class CentrifugalPumpExcelPage {
-    <<Excel UI>>
+    <<Blazor Excel UI>>
     +LoadData()
+    +SetColumnWidths()
     +SaveExcelToFolder()
+    +DownloadExcelAsync()
     +SaveContractExcel()
     +DownloadContractAsync()
+    -BuildContractFromSpreadsheetAsync()
 }
 
-class AdamDbContext {
-    <<EF Core>>
+class AppDbContextCentrifugalPump {
+    <<EF Core DbContext>>
+}
+
+class PumpNormativeSet {
+    <<Entity>>
+    +Id
+    +Name
+    +FileName
+    +CreatedAt
+}
+
+class PumpSeries {
+    <<Entity>>
+    +Id
+    +Name
+}
+
+class PumpImpeller {
+    <<Entity>>
+    +PumpSeriesId
+    +PumpNormativeSetId
+    +Impeller
+    +Hour
+}
+
+class PumpWeight {
+    <<Entity>>
+    +PumpSeriesId
+    +PumpNormativeSetId
+    +Weight
+    +Hour
+}
+
+class PumpVolume {
+    <<Entity>>
+    +PumpSeriesId
+    +PumpNormativeSetId
+    +Volume
+    +Hour
+}
+
+class PumpCentrifugalHistory {
+    <<Entity>>
+    +Name
+    +SelectedSeriesId
+    +PumpNormativeSetId
+    +NormativeSetName
+    +Number
+    +CostHour
+    +TotalSumHour
+    +TotalSumCostHour
+    +CreatedAt
+}
+
+class ExcelDataReader {
+    <<Excel Import>>
 }
 
 class SyncfusionSpreadsheet {
-    <<Spreadsheet>>
+    <<Spreadsheet UI>>
 }
 
 class ClosedXML {
-    <<Excel generation>>
+    <<Excel Generation>>
 }
 
-class CalculationHistory {
-    <<Output>>
-    Saved calculations
+class ExcelNormativeFiles {
+    <<Input>>
+    CollectCentrPumps_A.xlsx
+    CollectCentrPumps_B.xlsx
+    CollectCentrPumps_C.xlsx
 }
 
 class ExcelDocument {
     <<Output>>
-    XLSX contract
+    XLSX
 }
 
-CentrifugalPumpPage --> CentrifugalPumpModel : параметры
-CentrifugalPumpPage --> CentrifugalPumpService : расчёт
-CentrifugalPumpPage --> CentrifugalPumpHistoryService : история
+CentrifugalPumpController --> CentrifugalPumpModel : получает данные формы
+CentrifugalPumpController --> CentrifugalPumpService : выполняет расчёт
 
-CentrifugalPumpService --> AdamDbContext : данные насосов
+CentrifugalPumpService --> AppDbContextCentrifugalPump : читает нормативы
+CentrifugalPumpService --> PumpImpeller : подбирает ближайшее значение
+CentrifugalPumpService --> PumpWeight : подбирает ближайшее значение
+CentrifugalPumpService --> PumpVolume : подбирает ближайшее значение
+CentrifugalPumpService --> PumpNormativeSet : учитывает выбранный набор
 
-CentrifugalPumpHistoryService --> AdamDbContext : сохранение
-CentrifugalPumpHistoryService --> CalculationHistory : формирует историю
-AdamDbContext --> CalculationHistory : хранит
+CentrifugalPumpHistoryController --> CentrifugalPumpHistoryService : управляет историей
+CentrifugalPumpHistoryService --> AppDbContextCentrifugalPump : сохраняет / читает
+CentrifugalPumpHistoryService --> PumpCentrifugalHistory : создаёт запись
+PumpCentrifugalHistory --> PumpNormativeSet : сохраняет нормативный набор
 
-CentrifugalPumpExcelPage --> CentrifugalPumpHistoryService : загружает данные
+CentrifugalPumpImportController --> CentrifugalPumpExcelImportService : импортирует Excel
+ExcelNormativeFiles --> CentrifugalPumpImportController : файл с ПК или сервера
+CentrifugalPumpExcelImportService --> ExcelDataReader : читает Excel
+CentrifugalPumpExcelImportService --> AppDbContextCentrifugalPump : сохраняет данные
+CentrifugalPumpExcelImportService --> PumpNormativeSet : создаёт набор
+CentrifugalPumpExcelImportService --> PumpSeries : создаёт / находит серию
+CentrifugalPumpExcelImportService --> PumpImpeller : импортирует
+CentrifugalPumpExcelImportService --> PumpWeight : импортирует
+CentrifugalPumpExcelImportService --> PumpVolume : импортирует
+
+CentrifugalPumpExcelPage --> CentrifugalPumpHistoryService : получает историю
 CentrifugalPumpExcelPage --> SyncfusionSpreadsheet : отображает и редактирует
 CentrifugalPumpExcelPage --> ClosedXML : формирует контракт
 
-ClosedXML --> ExcelDocument : создаёт XLSX
-SyncfusionSpreadsheet --> ExcelDocument : Excel-данные
-```
+SyncfusionSpreadsheet --> ExcelDocument : сохраняет текущую таблицу
+ClosedXML --> ExcelDocument : создаёт контракт
