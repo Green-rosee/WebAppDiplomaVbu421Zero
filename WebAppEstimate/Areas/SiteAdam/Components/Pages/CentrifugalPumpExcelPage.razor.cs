@@ -66,19 +66,24 @@ public partial class CentrifugalPumpExcelPage
     ///     чтобы Spreadsheet соответствовал текущему состоянию базы.
     /// </summary>
     protected async Task LoadData()
+{
+    // Получаем актуальную историю расчётов из БД.
+    var histories =
+        await HistoryService.GetAllAsync();
+
+    // ----------------------------------------------------
+    // 1. Очищаем старые данные Spreadsheet.
+    // Теперь используем диапазон A:J, потому что добавили
+    // новую колонку "Нормативный сборник".
+    // ----------------------------------------------------
+
+    var clearUpdates =
+        new List<CellUpdateItem>();
+
+    for (var clearRow = 2; clearRow <= 200; clearRow++)
     {
-        var histories =
-            await HistoryService.GetAllAsync();
-
-        var clearUpdates =
-            new List<CellUpdateItem>();
-
-        for (var clearRow = 2;
-             clearRow <= 200;
-             clearRow++)
-        for (var column = 'A';
-             column <= 'I';
-             column++)
+        for (var column = 'A'; column <= 'J'; column++)
+        {
             clearUpdates.Add(
                 new CellUpdateItem
                 {
@@ -87,215 +92,260 @@ public partial class CentrifugalPumpExcelPage
 
                     Value = ""
                 });
-
-        await Spreadsheet
-            .UpdateCellsAsync(clearUpdates);
-
-        var updates =
-            new List<CellUpdateItem>
-            {
-                new()
-                {
-                    CellAddress = "Sheet1!A1",
-                    Value = "Наименование"
-                },
-                new()
-                {
-                    CellAddress = "Sheet1!B1",
-                    Value = "Количество"
-                },
-                new()
-                {
-                    CellAddress = "Sheet1!C1",
-                    Value = "Стоимость часа"
-                },
-                new()
-                {
-                    CellAddress = "Sheet1!D1",
-                    Value = "Крылатка, мм"
-                },
-                new()
-                {
-                    CellAddress = "Sheet1!E1",
-                    Value = "Производительность, м³/ч"
-                },
-                new()
-                {
-                    CellAddress = "Sheet1!F1",
-                    Value = "Масса, кг"
-                },
-                new()
-                {
-                    CellAddress = "Sheet1!G1",
-                    Value = "Трудоёмкость"
-                },
-                new()
-                {
-                    CellAddress = "Sheet1!H1",
-                    Value = "Общая стоимость"
-                },
-                new()
-                {
-                    CellAddress = "Sheet1!I1",
-                    Value = "Дата"
-                }
-            };
-
-        var row = 2;
-
-        foreach (var item in histories)
-        {
-            updates.Add(
-                new CellUpdateItem
-                {
-                    CellAddress =
-                        $"Sheet1!A{row}",
-
-                    Value = item.Name
-                });
-
-            updates.Add(
-                new CellUpdateItem
-                {
-                    CellAddress =
-                        $"Sheet1!B{row}",
-
-                    Value = item.Number
-                });
-
-            updates.Add(
-                new CellUpdateItem
-                {
-                    CellAddress =
-                        $"Sheet1!C{row}",
-
-                    Value = item.CostHour
-                });
-
-            updates.Add(
-                new CellUpdateItem
-                {
-                    CellAddress =
-                        $"Sheet1!D{row}",
-
-                    Value = item.Impeller
-                });
-
-            updates.Add(
-                new CellUpdateItem
-                {
-                    CellAddress =
-                        $"Sheet1!E{row}",
-
-                    Value = item.Volume
-                });
-
-            updates.Add(
-                new CellUpdateItem
-                {
-                    CellAddress =
-                        $"Sheet1!F{row}",
-
-                    Value = item.Weight
-                });
-
-            updates.Add(
-                new CellUpdateItem
-                {
-                    CellAddress =
-                        $"Sheet1!G{row}",
-
-                    Value = item.TotalSumHour
-                });
-
-            updates.Add(
-                new CellUpdateItem
-                {
-                    CellAddress =
-                        $"Sheet1!H{row}",
-
-                    Value = item.TotalSumCostHour
-                });
-
-            updates.Add(
-                new CellUpdateItem
-                {
-                    CellAddress =
-                        $"Sheet1!I{row}",
-
-                    Value = item.CreatedAt
-                        .ToLocalTime()
-                        .ToString("dd.MM.yyyy")
-                });
-
-            row++;
         }
-
-        await Spreadsheet
-            .UpdateCellsAsync(updates);
     }
 
+    // Отправляем очистку небольшими пачками.
+    foreach (var batch in clearUpdates.Chunk(100))
+    {
+        await Spreadsheet.UpdateCellsAsync(
+            batch.ToList());
+    }
+
+    // ----------------------------------------------------
+    // 2. Формируем заголовки таблицы.
+    // ----------------------------------------------------
+
+    var updates =
+        new List<CellUpdateItem>
+        {
+            new()
+            {
+                CellAddress = "Sheet1!A1",
+                Value = "Наименование"
+            },
+
+            new()
+            {
+                CellAddress = "Sheet1!B1",
+                Value = "Нормативный сборник"
+            },
+
+            new()
+            {
+                CellAddress = "Sheet1!C1",
+                Value = "Количество"
+            },
+
+            new()
+            {
+                CellAddress = "Sheet1!D1",
+                Value = "Стоимость часа"
+            },
+
+            new()
+            {
+                CellAddress = "Sheet1!E1",
+                Value = "Крылатка, мм"
+            },
+
+            new()
+            {
+                CellAddress = "Sheet1!F1",
+                Value = "Производительность, м³/ч"
+            },
+
+            new()
+            {
+                CellAddress = "Sheet1!G1",
+                Value = "Масса, кг"
+            },
+
+            new()
+            {
+                CellAddress = "Sheet1!H1",
+                Value = "Трудоёмкость"
+            },
+
+            new()
+            {
+                CellAddress = "Sheet1!I1",
+                Value = "Общая стоимость"
+            },
+
+            new()
+            {
+                CellAddress = "Sheet1!J1",
+                Value = "Дата"
+            }
+        };
+
+    // ----------------------------------------------------
+    // 3. Заполняем строки данными из истории.
+    // ----------------------------------------------------
+
+    var row = 2;
+
+    foreach (var item in histories)
+    {
+        updates.Add(
+            new CellUpdateItem
+            {
+                CellAddress = $"Sheet1!A{row}",
+                Value = item.Name
+            });
+
+        updates.Add(
+            new CellUpdateItem
+            {
+                CellAddress = $"Sheet1!B{row}",
+                Value = item.NormativeSetName
+            });
+
+        updates.Add(
+            new CellUpdateItem
+            {
+                CellAddress = $"Sheet1!C{row}",
+                Value = item.Number
+            });
+
+        updates.Add(
+            new CellUpdateItem
+            {
+                CellAddress = $"Sheet1!D{row}",
+                Value = item.CostHour
+            });
+
+        updates.Add(
+            new CellUpdateItem
+            {
+                CellAddress = $"Sheet1!E{row}",
+                Value = item.Impeller
+            });
+
+        updates.Add(
+            new CellUpdateItem
+            {
+                CellAddress = $"Sheet1!F{row}",
+                Value = item.Volume
+            });
+
+        updates.Add(
+            new CellUpdateItem
+            {
+                CellAddress = $"Sheet1!G{row}",
+                Value = item.Weight
+            });
+
+        updates.Add(
+            new CellUpdateItem
+            {
+                CellAddress = $"Sheet1!H{row}",
+                Value = item.TotalSumHour
+            });
+
+        updates.Add(
+            new CellUpdateItem
+            {
+                CellAddress = $"Sheet1!I{row}",
+                Value = item.TotalSumCostHour
+            });
+
+        updates.Add(
+            new CellUpdateItem
+            {
+                CellAddress = $"Sheet1!J{row}",
+                Value = item.CreatedAt
+                    .ToLocalTime()
+                    .ToString("dd.MM.yyyy")
+            });
+
+        row++;
+    }
+
+    // ----------------------------------------------------
+    // 4. Обновляем Spreadsheet небольшими пачками.
+    // Это должно убрать ситуацию, когда часть ячеек
+    // теряется при одном большом UpdateCellsAsync().
+    // ----------------------------------------------------
+    foreach (var batch in clearUpdates.Chunk(100))
+    {
+        await Spreadsheet.UpdateCellsAsync(
+            batch.ToList());
+    }
+
+    await Task.Delay(100);
+    await Spreadsheet.UpdateCellsAsync(updates);
+    
+    
+}
+    
+    
+    
+    
+    
     /// <summary>
     ///     Устанавливает ширину столбцов Excel-таблицы
     ///     для более удобного отображения расчётных данных.
     /// </summary>
     protected async Task SetColumnWidths()
     {
-        await Spreadsheet
-            .SetColumnWidthAsync(
-                180,
-                0,
-                0);
+        // A - Наименование
+        await Spreadsheet.SetColumnWidthAsync(
+            180,
+            0,
+            0);
 
-        await Spreadsheet
-            .SetColumnWidthAsync(
-                90,
-                1,
-                0);
+        // B - Нормативный сборник
+        await Spreadsheet.SetColumnWidthAsync(
+            160,
+            1,
+            0);
 
-        await Spreadsheet
-            .SetColumnWidthAsync(
-                120,
-                2,
-                0);
+        // C - Количество
+        await Spreadsheet.SetColumnWidthAsync(
+            100,
+            2,
+            0);
 
-        await Spreadsheet
-            .SetColumnWidthAsync(
-                110,
-                3,
-                0);
+        // D - Стоимость часа
+        await Spreadsheet.SetColumnWidthAsync(
+            130,
+            3,
+            0);
 
-        await Spreadsheet
-            .SetColumnWidthAsync(
-                180,
-                4,
-                0);
+        // E - Крылатка, мм
+        await Spreadsheet.SetColumnWidthAsync(
+            120,
+            4,
+            0);
 
-        await Spreadsheet
-            .SetColumnWidthAsync(
-                100,
-                5,
-                0);
+        // F - Производительность, м³/ч
+        await Spreadsheet.SetColumnWidthAsync(
+            190,
+            5,
+            0);
 
-        await Spreadsheet
-            .SetColumnWidthAsync(
-                120,
-                6,
-                0);
+        // G - Масса, кг
+        await Spreadsheet.SetColumnWidthAsync(
+            110,
+            6,
+            0);
 
-        await Spreadsheet
-            .SetColumnWidthAsync(
-                150,
-                7,
-                0);
+        // H - Трудоёмкость
+        await Spreadsheet.SetColumnWidthAsync(
+            130,
+            7,
+            0);
 
-        await Spreadsheet
-            .SetColumnWidthAsync(
-                120,
-                8,
-                0);
+        // I - Общая стоимость
+        await Spreadsheet.SetColumnWidthAsync(
+            150,
+            8,
+            0);
+
+        // J - Дата
+        await Spreadsheet.SetColumnWidthAsync(
+            120,
+            9,
+            0);
     }
-
+    
+    
+    
+    
+    
+    
     /// <summary>
     ///     Обрабатывает начало редактирования ячейки
     ///     и сохраняет информацию о текущей редактируемой ячейке.
@@ -457,7 +507,421 @@ public partial class CentrifugalPumpExcelPage
     /// <returns>
     ///     Сформированная Excel-книга контракта.
     /// </returns>
-    private async Task<XLWorkbook>
+    ///
+    ///
+    /// 
+    private async Task<XLWorkbook> BuildContractFromSpreadsheetAsync()
+{
+    // Получаем текущее состояние Spreadsheet.
+    using var spreadsheetStream =
+        await Spreadsheet.SaveAsStreamAsync();
+
+    spreadsheetStream.Position = 0;
+
+    // Открываем текущую Spreadsheet-таблицу через ClosedXML.
+    using var sourceWorkbook =
+        new XLWorkbook(
+            spreadsheetStream);
+
+    var sourceSheet =
+        sourceWorkbook.Worksheet(
+            "Sheet1");
+
+    // Создаём отдельную Excel-книгу контракта.
+    var contractWorkbook =
+        new XLWorkbook();
+
+    var contractSheet =
+        contractWorkbook.Worksheets.Add(
+            "Контракт");
+
+    // --------------------------------------------------
+    // Заголовок контракта.
+    // --------------------------------------------------
+
+    contractSheet.Cell("A1").Value =
+        "КОНТРАКТ";
+
+    contractSheet.Cell("A3").Value =
+        "Заказчик:";
+
+    contractSheet.Cell("B3").Value =
+        "ООО Заказчик";
+
+    contractSheet.Cell("A4").Value =
+        "Дата:";
+
+    contractSheet.Cell("B4").Value =
+        DateTime.Now;
+
+    // --------------------------------------------------
+    // Заголовки таблицы контракта.
+    // --------------------------------------------------
+
+    contractSheet.Cell("A6").Value =
+        "Наименование";
+
+    contractSheet.Cell("B6").Value =
+        "Нормативный сборник";
+
+    contractSheet.Cell("C6").Value =
+        "Количество";
+
+    contractSheet.Cell("D6").Value =
+        "Стоимость часа";
+
+    contractSheet.Cell("E6").Value =
+        "Общая стоимость";
+
+    // Первая строка с данными.
+    var contractRow = 7;
+
+    var lastRow =
+        sourceSheet
+            .LastRowUsed()?
+            .RowNumber()
+        ?? 1;
+
+    // --------------------------------------------------
+    // Читаем строки из текущего Spreadsheet.
+    // --------------------------------------------------
+
+    for (var sourceRow = 2;
+         sourceRow <= lastRow;
+         sourceRow++)
+    {
+        var name =
+            sourceSheet
+                .Cell(
+                    sourceRow,
+                    1)
+                .GetString()
+                .Trim();
+
+        // Пустые строки пропускаем.
+        if (string.IsNullOrWhiteSpace(name))
+            continue;
+
+        // A - Наименование
+        contractSheet
+            .Cell(
+                contractRow,
+                1)
+            .Value = name;
+
+        // B - Нормативный сборник
+        contractSheet
+            .Cell(
+                contractRow,
+                2)
+            .Value =
+            sourceSheet
+                .Cell(
+                    sourceRow,
+                    2)
+                .Value;
+
+        // C - Количество
+        contractSheet
+            .Cell(
+                contractRow,
+                3)
+            .Value =
+            sourceSheet
+                .Cell(
+                    sourceRow,
+                    3)
+                .Value;
+
+        // D - Стоимость часа
+        contractSheet
+            .Cell(
+                contractRow,
+                4)
+            .Value =
+            sourceSheet
+                .Cell(
+                    sourceRow,
+                    4)
+                .Value;
+
+        // E - Общая стоимость
+        // В Spreadsheet это теперь колонка I = 9.
+        contractSheet
+            .Cell(
+                contractRow,
+                5)
+            .Value =
+            sourceSheet
+                .Cell(
+                    sourceRow,
+                    9)
+                .Value;
+
+        contractRow++;
+    }
+
+    // --------------------------------------------------
+    // Итоговая сумма.
+    // --------------------------------------------------
+
+    contractSheet
+        .Cell(
+            contractRow + 1,
+            4)
+        .Value =
+        "ИТОГО:";
+
+    contractSheet
+        .Cell(
+            contractRow + 1,
+            5)
+        .FormulaA1 =
+        $"SUM(E7:E{contractRow - 1})";
+
+    // Автоматически подгоняем ширину колонок.
+    contractSheet
+        .Columns()
+        .AdjustToContents();
+
+    return contractWorkbook;
+}
+}
+
+//------------------------------------------
+/*protected async Task LoadData()
+    {
+        var histories =
+            await HistoryService.GetAllAsync();
+
+        foreach (var h in histories)
+        {
+            Console.WriteLine(
+                $"{h.Name} | {h.Number} | {h.CostHour} | {h.Impeller} | " +
+                $"{h.Volume} | {h.Weight} | {h.TotalSumHour} | {h.TotalSumCostHour}");
+        }
+        
+        
+        
+        
+        var clearUpdates =
+            new List<CellUpdateItem>();
+
+        for (var clearRow = 2; clearRow <= 200; clearRow++)
+            
+        for (var column = 'A'; column <= 'I'; column++)
+            clearUpdates.Add(
+                new CellUpdateItem
+                {
+                    CellAddress =
+                        $"Sheet1!{column}{clearRow}",
+
+                    Value = ""
+                });
+
+        await Spreadsheet
+            .UpdateCellsAsync(clearUpdates);
+
+        var updates =
+            new List<CellUpdateItem>
+            {
+                new()
+                {
+                    CellAddress = "Sheet1!A1",
+                    Value = "Наименование"
+                },
+                new()
+                {
+                    CellAddress = "Sheet1!B1",
+                    Value = "Количество"
+                },
+                new()
+                {
+                    CellAddress = "Sheet1!C1",
+                    Value = "Стоимость часа"
+                },
+                new()
+                {
+                    CellAddress = "Sheet1!D1",
+                    Value = "Крылатка, мм"
+                },
+                new()
+                {
+                    CellAddress = "Sheet1!E1",
+                    Value = "Производительность, м³/ч"
+                },
+                new()
+                {
+                    CellAddress = "Sheet1!F1",
+                    Value = "Масса, кг"
+                },
+                new()
+                {
+                    CellAddress = "Sheet1!G1",
+                    Value = "Трудоёмкость"
+                },
+                new()
+                {
+                    CellAddress = "Sheet1!H1",
+                    Value = "Общая стоимость"
+                },
+                new()
+                {
+                    CellAddress = "Sheet1!I1",
+                    Value = "Дата"
+                }
+            };
+
+        var row = 2;
+
+        foreach (var item in histories)
+        {
+            updates.Add(
+                new CellUpdateItem
+                {
+                    CellAddress =
+                        $"Sheet1!A{row}",
+
+                    Value = item.Name
+                });
+
+            updates.Add(
+                new CellUpdateItem
+                {
+                    CellAddress =
+                        $"Sheet1!B{row}",
+
+                    Value = item.Number
+                });
+
+            updates.Add(
+                new CellUpdateItem
+                {
+                    CellAddress =
+                        $"Sheet1!C{row}",
+
+                    Value = item.CostHour
+                });
+
+            updates.Add(
+                new CellUpdateItem
+                {
+                    CellAddress =
+                        $"Sheet1!D{row}",
+
+                    Value = item.Impeller
+                });
+
+            updates.Add(
+                new CellUpdateItem
+                {
+                    CellAddress =
+                        $"Sheet1!E{row}",
+
+                    Value = item.Volume
+                });
+
+            updates.Add(
+                new CellUpdateItem
+                {
+                    CellAddress =
+                        $"Sheet1!F{row}",
+
+                    Value = item.Weight
+                });
+
+            updates.Add(
+                new CellUpdateItem
+                {
+                    CellAddress =
+                        $"Sheet1!G{row}",
+
+                    Value = item.TotalSumHour
+                });
+
+            updates.Add(
+                new CellUpdateItem
+                {
+                    CellAddress =
+                        $"Sheet1!H{row}",
+
+                    Value = item.TotalSumCostHour
+                });
+
+            updates.Add(
+                new CellUpdateItem
+                {
+                    CellAddress =
+                        $"Sheet1!I{row}",
+
+                    Value = item.CreatedAt
+                        .ToLocalTime()
+                        .ToString("dd.MM.yyyy")
+                });
+
+            row++;
+        }
+
+        await Spreadsheet
+            .UpdateCellsAsync(updates);
+    }*/
+/*protected async Task SetColumnWidths()
+{
+    await Spreadsheet
+        .SetColumnWidthAsync(
+            180,
+            0,
+            0);
+
+    await Spreadsheet
+        .SetColumnWidthAsync(
+            90,
+            1,
+            0);
+
+    await Spreadsheet
+        .SetColumnWidthAsync(
+            120,
+            2,
+            0);
+
+    await Spreadsheet
+        .SetColumnWidthAsync(
+            110,
+            3,
+            0);
+
+    await Spreadsheet
+        .SetColumnWidthAsync(
+            180,
+            4,
+            0);
+
+    await Spreadsheet
+        .SetColumnWidthAsync(
+            100,
+            5,
+            0);
+
+    await Spreadsheet
+        .SetColumnWidthAsync(
+            120,
+            6,
+            0);
+
+    await Spreadsheet
+        .SetColumnWidthAsync(
+            150,
+            7,
+            0);
+
+    await Spreadsheet
+        .SetColumnWidthAsync(
+            120,
+            8,
+            0);
+}*/
+ /*private async Task<XLWorkbook>
         BuildContractFromSpreadsheetAsync()
     {
         using var spreadsheetStream =
@@ -592,7 +1056,4 @@ public partial class CentrifugalPumpExcelPage
             .AdjustToContents();
 
         return contractWorkbook;
-    }
-}
-
-//------------------------------------------
+    }*/
