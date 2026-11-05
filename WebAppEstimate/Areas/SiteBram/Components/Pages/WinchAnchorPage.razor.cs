@@ -1,5 +1,7 @@
+using FluentValidation;
 using Microsoft.AspNetCore.Components;
 using WebAppEstimate.Areas.SiteBram.Data.Entity.WinchAnchors;
+using WebAppEstimate.Areas.SiteBram.Models;
 using WebAppEstimate.Areas.SiteBram.Services;
 
 //using WebAppEstimate.Areas.SiteBram.Entity;
@@ -13,8 +15,8 @@ public partial class WinchAnchorPage
     [Inject] private IWinchAnchorHistoryService HistoryService { get; set; } = null!;
     //------------
 
-    /*[Inject]
-    private WinchAnchorExcelState ExcelState { get; set; } = null!;*/
+    [Inject]
+    private IValidator<WinchAnchorModel> Validator { get; set; } = null!;
 
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
 
@@ -38,14 +40,17 @@ public partial class WinchAnchorPage
 
     protected decimal HourCost { get; set; }
 
-    /*protected decimal TotalCost =>
-        Result is null
-            ? 0
-            : (decimal)Result.Hour * HourCost;*/
+    
+
+    /*protected bool CanSave =>
+        Result != null && HourCost > 0;*/
 
     protected bool CanSave =>
-        Result != null && HourCost > 0;
-
+        Result != null &&
+        HourCost > 0 &&
+        Quantity > 0;
+    
+    
     protected string WinchName { get; set; } = string.Empty;
 
     protected bool CanShowExcel =>
@@ -70,24 +75,43 @@ public partial class WinchAnchorPage
         Message = string.Empty;
         Result = null;
 
-        if (SelectedSeriesId == null)
+        var model = new WinchAnchorModel
         {
-            Message = "Выберите серию лебёдки.";
+            SeriesId = SelectedSeriesId,
+            ValueKg = ValueKg,
+            ValueMm = ValueMm,
+            ValueKgMm = ValueKgMm,
+            HourCost = HourCost,
+            Quantity = Quantity
+        };
+
+        var validationResult =
+            await Validator.ValidateAsync(model);
+
+        if (!validationResult.IsValid)
+        {
+            Message = string.Join(
+                " ",
+                validationResult.Errors
+                    .Select(x => x.ErrorMessage));
+
             return;
         }
 
         Result = await WinchAnchorService.FindDesignAsync(
-            SelectedSeriesId.Value,
+            SelectedSeriesId!.Value,
             ValueKg,
             ValueMm,
             ValueKgMm);
 
         if (Result == null)
+        {
             Message =
                 "Подходящая конфигурация якорной лебёдки не найдена.";
+        }
     }
-
-
+    
+    
     protected async Task SaveAsync()
     {
         if (Result == null || SelectedSeriesId == null)
@@ -151,3 +175,25 @@ public partial class WinchAnchorPage
         Quantity = 1;
     }
 }
+
+/*protected async Task CalculateAsync()
+    {
+        Message = string.Empty;
+        Result = null;
+
+        if (SelectedSeriesId == null)
+        {
+            Message = "Выберите серию лебёдки.";
+            return;
+        }
+
+        Result = await WinchAnchorService.FindDesignAsync(
+            SelectedSeriesId.Value,
+            ValueKg,
+            ValueMm,
+            ValueKgMm);
+
+        if (Result == null)
+            Message =
+                "Подходящая конфигурация якорной лебёдки не найдена.";
+    }*/

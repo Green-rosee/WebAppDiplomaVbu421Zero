@@ -9,4 +9,8 @@ public class WinchAnchorModel
     public int ValueMm { get; set; }
 
     public int ValueKgMm { get; set; }
+    
+    public decimal HourCost { get; set; }
+
+    public int Quantity { get; set; }
 }
