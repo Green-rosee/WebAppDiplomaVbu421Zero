@@ -620,7 +620,7 @@ docker compose -f docker-compose.dev.yml up --build
 
 Приложение доступно по адресу:
 
-`http://localhost:8081`
+`http://localhost:9001`
 
 ### Docker Release
 
